@@ -2,7 +2,7 @@ import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {capTexture,capObjectTextures} from './texture-budget.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
-import {weatherStone,floorStyleUniforms,FLOOR_STYLES,scaleStoneUV,vaultSection,archSpandrel,pointedGateShape} from './stone-weathering.js';
+import {weatherStone,floorStyleUniforms,scaleStoneUV,vaultSection,archSpandrel,pointedGateShape} from './stone-weathering.js';
 import {cathedralGlass} from './cathedral-glass.js';
 import {brokenSlab,fracturedRock,stoneFragmentTint} from './rubble-geometry.js';
 import {CANDLE_STANDS,CANDLE_BASE_RADIUS,candleGroundColliders} from './arena-layout.js';
@@ -95,8 +95,8 @@ export async function buildArena(scene,texturePaths={}){
  // roughness in alpha) and the floor's own set is the grey flagstone; the
  // chequer and tomb sets are blended in by stone-weathering.js (floor zones).
  texturePaths={...texturePaths,stone:{map:ASSETS.cathedralWall,normalMap:ASSETS.wallAshlarNR},floor:{map:ASSETS.floorFlagstoneGrey,normalMap:ASSETS.floorFlagstoneGreyNR}};
- // Touch (17 Sep 2026): main.js passes shadowScale (.5 on a phone: the moon's 3072 map becomes 1536, the cookie spots
- // halve) and textureCap (1024: the monument's 4096 maps and the 2048 seal are shrunk before their first upload,
+ // Touch (17 Sep 2026): main.js passes shadowScale (1/3 on a phone since 13 Oct 2026: the moon's 3072 map becomes 1024;
+ // the cookie spots cast no shadow there under lightBudget) and textureCap (1024: the monument's 4096 maps and the 2048 seal are shrunk before their first upload,
  // texture-budget.js). Both default to what shipped.
  const shadowScale=texturePaths.shadowScale??1,textureCap=texturePaths.textureCap??0;
  const root=new T.Group();root.name='Cathedral of the Last Rite';scene.add(root);
@@ -130,24 +130,13 @@ export async function buildArena(scene,texturePaths={}){
  // .196/.174/.134); the grey set is lighter and neutral (.225/.231/.225), so
  // the colour is pulled down to keep the floor's mean albedo where it was,
  // a touch cooler than equal-mean (0x595953) for the DS3 blue-grey.
- const [stone,floorMat,chequerMap,chequerNR,tombMap,tombNR]=await Promise.all([material(texturePaths.stone,0x7d858a,.45),material(texturePaths.floor,0x565d62,1/2.4),
-  zoneTexture(ASSETS.floorChequer,true),zoneTexture(ASSETS.floorChequerNR,false),zoneTexture(ASSETS.floorTomb,true),zoneTexture(ASSETS.floorTombNR,false)]);
+ const [stone,floorMat,naveMap,naveNR,tombMap,tombNR]=await Promise.all([material(texturePaths.stone,0x7d858a,.45),material(texturePaths.floor,0x565d62,1/2.4),
+  zoneTexture(ASSETS.floorBasalt,true),zoneTexture(ASSETS.floorBasaltNR,false),zoneTexture(ASSETS.floorTomb,true),zoneTexture(ASSETS.floorTombNR,false)]);
  floorMat.userData.worldUV=true;
- // The nave set can be swapped for a darker one (pause menu, Floor); the others load on first use.
- const floorUniforms=floorStyleUniforms('chequer',chequerMap,chequerNR);
- const floorSets={chequer:Promise.resolve([chequerMap,chequerNR]),
-  basalt:null,marble:null},floorSources={basalt:[ASSETS.floorBasalt,ASSETS.floorBasaltNR],marble:[ASSETS.floorMarble,ASSETS.floorMarbleNR]};
- let floorRequest=0;
- async function setFloorStyle(style){
-  if(!FLOOR_STYLES[style])style='chequer';
-  const request=++floorRequest;
-  floorSets[style]??=Promise.all([zoneTexture(floorSources[style][0],true),zoneTexture(floorSources[style][1],false)]);
-  const [map,nr]=await floorSets[style];
-  if(request!==floorRequest||!map||!nr)return;
-  const next=floorStyleUniforms(style,map,nr);
-  for(const key of Object.keys(next))floorUniforms[key].value=next[key].value;
- }
- weatherStone(stone);weatherStone(floorMat,{floor:true,zones:{chequer:{map:chequerMap,nr:chequerNR,uniforms:floorUniforms},tomb:{map:tombMap,nr:tombNR}}});floorMat.envMapIntensity=.32;
+ // The nave set is the black basalt, the only floor since 13 Oct 2026 (the load pass dropped the pause-menu Floor
+ // choice). It fills the shader's nave slot, still named "chequer" after the set that first occupied it.
+ const floorUniforms=floorStyleUniforms('basalt',naveMap,naveNR);
+ weatherStone(stone);weatherStone(floorMat,{floor:true,zones:{chequer:{map:naveMap,nr:naveNR,uniforms:floorUniforms},tomb:{map:tombMap,nr:tombNR}}});floorMat.envMapIntensity=.32;
  stone.vertexColors=true;
  floorMat.bumpScale=.032;
  // Per-surface relief strength: the vault is seen at 15 m and only aliases at
@@ -1132,7 +1121,7 @@ export async function buildArena(scene,texturePaths={}){
  // draw from the debris sprite sheet. Placed LAST so the rand() draws leave
  // every earlier procedural placement bit-for-bit where it was.
  const debris=debrisScatter(debrisTexture,rand);if(debris)root.add(debris);
- return{setFloorStyle,root,lights,cameraColliders,groundColliders:[...candleGroundColliders(),...propColliders],
+ return{root,lights,cameraColliders,groundColliders:[...candleGroundColliders(),...propColliders],
   /** 0..1: how much the seal's inlay smoulders (main.js: .12 at the start of a fight, 1 from the phase change). */
   sealHeat(value){sealHeatTarget=Math.max(0,Math.min(1,Number.isFinite(value)?value:0));},
   update(time,camera){

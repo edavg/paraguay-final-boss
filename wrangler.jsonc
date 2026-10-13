@@ -1,0 +1,14 @@
+{
+  // Cloudflare Workers static assets deploy (13 Oct 2026). `wrangler deploy` uploads
+  // ./dist as-is: the game plus the review pages. No Worker script — the assets are
+  // served directly, so static requests are free and unlimited.
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "paraguay-final-boss",
+  "compatibility_date": "2026-10-12",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "./dist"
+  }
+}

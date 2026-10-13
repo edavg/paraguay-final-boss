@@ -112,8 +112,6 @@ export class GameAudio{
  pause(){this.suspended=true;this.music.pause();this.clear();this.context?.suspend().catch(()=>{});}
  resume(){if(this.enabled){this.suspended=false;this.context?.resume().catch(()=>{});this.music.play().catch(()=>{});}}
  setListener(position,yaw){this.listener={x:position.x,z:position.z,yaw};}
- /** Swap the looping track (pause menu, Music track). preview plays it even while the game is paused so it can be heard. */
- setTrack(url,{preview=false}={}){if(!url)return;const next=new URL(url,location.href).href;if(this.music.src===next)return;const playing=!this.music.paused;this.music.src=next;this.music.load();if(playing||(preview&&this.enabled))this.music.play().catch(()=>{});}
  setMusic(value){this.musicLevel=clamp(value,0,1)*.375;/* 25 % under round 2 (user, 16 Sep) */if(this.musicGain){this.musicGain.gain.value=this.musicLevel;this.music.volume=1;}else this.music.volume=this.musicLevel;}
  setSfx(value){this.volume=clamp(value,0,1);this.master?.gain.setTargetAtTime(this.volume,this.context.currentTime,.015);}
  status(){return`${this.context?.state==='running'?'Audio espacial':this.suspended?'Audio en pausa':'Audio listo'} · ${this.buffers.size}/${SOUNDS.length} sonidos · ${this.pool.size} voces`;}

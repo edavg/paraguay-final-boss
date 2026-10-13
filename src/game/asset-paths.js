@@ -29,7 +29,9 @@ export const ASSETS={
  playerSword:new URL('../../assets/create-the-exact-isolated-player-sword-s-cmu12ngf.glb',import.meta.url).href,
  stone:new URL('../../assets/ancient-gothic-cathedral-limestone-mason-cmu1fw79.png',import.meta.url).href,
  floor:new URL('../../assets/ancient-dark-cathedral-flagstone-floor-l-cmu1fw8c.png',import.meta.url).href,
- music:new URL('../../assets/seamless-loop-no-intro-or-outro-dark-got-cmu1fw9k.mp3',import.meta.url).href,
+ // The one music track (13 Oct 2026, the load pass): the choir, formerly "Coro de pavor" in the pause menu.
+ // The other three tracks are no longer bundled; the files stay in assets/.
+ music:new URL('../../assets/a-dark-gothic-boss-battle-theme-slow-and-cmu4dws4.mp3',import.meta.url).href,
  impact:new URL('../../assets/one-powerful-heavy-steel-scythe-impact-a-cmu1fwan.mp3',import.meta.url).href,
  swing:new URL('../../assets/one-heavy-two-handed-scythe-swing-whoosh-cmu1fwbo.mp3',import.meta.url).href,
  groundSlam:new URL('../../assets/sfx/boss-ground-slam-cmu37r5d.mp3',import.meta.url).href,
@@ -57,13 +59,10 @@ export const ASSETS={
  // itself so its joints and streaks match the albedo exactly.
  floorFlagstoneGrey:new URL('../../assets/environment/floor-flagstone-grey.jpg',import.meta.url).href,
  floorFlagstoneGreyNR:new URL('../../assets/environment/floor-flagstone-grey-nr.png',import.meta.url).href,
- floorChequer:new URL('../../assets/environment/floor-chequer.jpg',import.meta.url).href,
- floorChequerNR:new URL('../../assets/environment/floor-chequer-nr.png',import.meta.url).href,
- // Round 2 follow-up (16 Sep evening): two darker nave sets, switchable in the pause menu (Floor).
+ // The nave set: black basalt, the only floor since 13 Oct 2026 (the load pass removed the pause-menu Floor choice
+ // and with it the chequer and diagonal-marble sets; their files stay in assets/environment/).
  floorBasalt:new URL('../../assets/environment/floor-basalt.jpg',import.meta.url).href,
  floorBasaltNR:new URL('../../assets/environment/floor-basalt-nr.png',import.meta.url).href,
- floorMarble:new URL('../../assets/environment/floor-marble-diagonal.jpg',import.meta.url).href,
- floorMarbleNR:new URL('../../assets/environment/floor-marble-diagonal-nr.png',import.meta.url).href,
  floorTomb:new URL('../../assets/environment/floor-tomb.jpg',import.meta.url).href,
  floorTombNR:new URL('../../assets/environment/floor-tomb-nr.png',import.meta.url).href,
  wallAshlarNR:new URL('../../assets/environment/wall-ashlar-nr.png',import.meta.url).href,
@@ -102,11 +101,3 @@ export const MOBILE_ASSETS={
  floorSealNR:new URL('../../assets/mobile/floor-seal-nr.png',import.meta.url).href,
 };
 
-// Music track choices (pause menu, Music track). 'cathedral' is ASSETS.music, the default.
-// The two darker alternatives were generated on 16 Sep 2026 evening (docs/asset-plan.md).
-export const MUSIC_TRACKS={
- cathedral:ASSETS.music,
- dread:new URL('../../assets/a-dark-gothic-boss-battle-theme-slow-and-cmu4dws4.mp3',import.meta.url).href,
- steady:new URL('../../assets/music/brooding-vigil.mp3',import.meta.url).href,
- bells:new URL('../../assets/very-dark-ambient-orchestral-theme-for-a-cmu4dwyf.mp3',import.meta.url).href,
-};

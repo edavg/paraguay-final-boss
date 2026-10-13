@@ -5,6 +5,9 @@
 !.env.example
 node_modules/
 
+# Wrangler local state (Cloudflare Workers deploy)
+.wrangler/
+
 dist/
 
 # Genex source push (17 Sep 2026): the game's source on Genex carries only what the build needs. assets/ (8 GB of

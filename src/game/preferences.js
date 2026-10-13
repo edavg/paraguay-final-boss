@@ -3,15 +3,13 @@ const KEY='vesper.presentation.v1';
 // then "10% brighter by default" again); a saved profile still holding an old default is treated as unset so it
 // picks the new one up (LEGACY_BRIGHTNESS).
 const LEGACY_BRIGHTNESS=[1.12,1.24];
-const DEFAULTS={quality:'high',floor:'basalt','music-track':'cathedral',brightness:1.36,'music-volume':.2,'effects-volume':.6,'toggle-movement':false,'toggle-shield':false,'show-stats':false};
+const DEFAULTS={quality:'high',brightness:1.36,'music-volume':.2,'effects-volume':.6,'toggle-movement':false,'toggle-shield':false,'show-stats':false};
 const RANGES={brightness:[.7,1.7],'music-volume':[0,1],'effects-volume':[0,1]};
 
 export function sanitizePreferences(value,defaults={}){
  const result={...DEFAULTS,...defaults};
  if(!value||typeof value!=='object')return result;
  if(['high','balanced','low'].includes(value.quality))result.quality=value.quality;
- if(['chequer','basalt','marble'].includes(value.floor))result.floor=value.floor;
- if(['cathedral','steady','dread','bells'].includes(value['music-track']))result['music-track']=value['music-track'];
  for(const[key,[min,max]]of Object.entries(RANGES)){
   if(key==='brightness'&&LEGACY_BRIGHTNESS.some(legacy=>Math.abs(value[key]-legacy)<1e-6))continue;
   if(typeof value[key]==='number'&&Number.isFinite(value[key]))result[key]=Math.min(max,Math.max(min,value[key]));
@@ -30,8 +28,8 @@ export function initializePreferences(handlers,{defaults={}}={}){
   if(!element)continue;
   if(checkbox)element.checked=value;else element.value=String(value);
   handlers[id]?.(value);
-  element.addEventListener(checkbox||['quality','floor','music-track'].includes(id)?'change':'input',()=>{
-   const input=checkbox?element.checked:['quality','floor','music-track'].includes(id)?element.value:Number(element.value);
+  element.addEventListener(checkbox||id==='quality'?'change':'input',()=>{
+   const input=checkbox?element.checked:id==='quality'?element.value:Number(element.value);
    const cleaned=sanitizePreferences({...preferences,[id]:input},defaults);Object.assign(preferences,cleaned);
    handlers[id]?.(preferences[id]);
    try{storage?.setItem(KEY,JSON.stringify(preferences));}catch{/* Playback still works when storage is unavailable. */}

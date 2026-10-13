@@ -1,0 +1,8 @@
+# Cloudflare Workers static assets — response headers.
+# Every file Vite writes under /assets carries an 8-character content hash in its
+# name (game-CXnSAyKA.js, player-paraguay-rig-v3-CVDjL4Rr.glb, ...), so those URLs
+# can never change content: let browsers keep them without revalidating.
+# HTML stays on the platform default (Cache-Control: public, max-age=0,
+# must-revalidate) so a new deploy is picked up immediately.
+/assets/*
+  Cache-Control: public, max-age=31556952, immutable

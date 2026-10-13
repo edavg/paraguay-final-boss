@@ -49,9 +49,9 @@ const F=x=>{const s=String(x);return /[.e]/.test(s)?s:s+'.0';};
 // modulation avoids the repeated dark patches that reveal tiled photographs.
 // options.zones (floor only): {chequer:{map,nr}, tomb:{map,nr}} - the two extra
 // paving sets; the material's own map/normalMap is the flagstone set.
-// The nave set is swappable at runtime (user, 16 Sep evening: "a different floor, but keep this one").
-// FLOOR_STYLES name each set's tile size, grid offset and grade; arena.setFloorStyle() swaps the
-// shared uniforms, so no recompile. grade = [gain at black, gain at white, saturation kept].
+// FLOOR_STYLES name each nave set's tile size, grid offset and grade. grade = [gain at black, gain at white,
+// saturation kept]. Since 13 Oct 2026 (the load pass) arena.js always fills the nave slot with basalt; the
+// other entries record the earlier pause-menu choices.
 export const FLOOR_STYLES={
   chequer:{label:'Mármol ajedrezado',tile:2.4,offset:[0,0],grade:[.62,.80,.85]},
   basalt:{label:'Basalto negro',tile:4.8,offset:[.6,0],grade:[1.05,1.1,.9]},

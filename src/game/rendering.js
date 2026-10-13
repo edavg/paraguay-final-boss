@@ -257,7 +257,10 @@ export function createRendering(canvas,{touch=false}={}) {
  // for active combat than the previous 1.25 scale. Contact AO remains enabled.
  const renderer=new T.WebGLRenderer({canvas,antialias:false,powerPreference:'high-performance'});
  renderer.setPixelRatio(Math.min(devicePixelRatio,1.15));
- renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+ renderer.shadowMap.enabled=true;
+ // Touch (13 Oct 2026, the load pass): plain PCF on a phone (PCFSoft's extra taps cost every shadowed pixel), and the
+ // shadow maps refresh every other frame (render() below): the nave is static, only the two actors move.
+ renderer.shadowMap.type=touch?T.PCFShadowMap:T.PCFSoftShadowMap;if(touch)renderer.shadowMap.autoUpdate=false;
  renderer.toneMapping=T.AgXToneMapping;
  let brightness=1.12;
  Object.defineProperty(renderer,'toneMappingExposure',{configurable:true,get:()=>brightness*AGX_GAIN,set(value){brightness=value;}});
@@ -266,7 +269,9 @@ export function createRendering(canvas,{touch=false}={}) {
  const env=pmrem.fromEquirectangular(sky);scene.environment=env.texture;scene.environmentIntensity=.30;sky.dispose();pmrem.dispose();
  const puddles=createPuddles(scene);
  const camera=new T.PerspectiveCamera(52,1,.08,170);camera.position.set(0,3.5,14);
- const target=new T.WebGLRenderTarget(1,1,{type:T.HalfFloatType,samples:4});
+ // Touch (13 Oct 2026): a phone's tiled GPU pays heavily to resolve 4x MSAA on a half-float target, so it takes no
+ // MSAA where SMAA runs and 2x where it does not (quality() below). The desktop keeps 4x.
+ const target=new T.WebGLRenderTarget(1,1,{type:T.HalfFloatType,samples:touch?0:4});
  const composer=new EffectComposer(renderer,target);composer.addPass(new RenderPass(scene,camera));
  // Half-resolution contact occlusion anchors armor, feet and masonry crevices.
  // Transparent atmosphere never writes its billboard shape into the AO buffer.
@@ -405,7 +410,9 @@ export function createRendering(canvas,{touch=false}={}) {
  const ratioFor=mode=>pixelRatioFor({mode,touch,dpr:devicePixelRatio,width:innerWidth,height:innerHeight});
  function resize(){const w=innerWidth,h=innerHeight;if(touch){const ratio=ratioFor(currentMode);renderer.setPixelRatio(ratio);composer.setPixelRatio(ratio);}renderer.setSize(w,h,false);composer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();grade.uniforms.uAspect.value=w/h;}
  addEventListener('resize',resize);resize();
- function quality(mode){currentMode=mode;puddles.quality(touch?(mode==='high'?'balanced':'low'):mode);const ratio=ratioFor(mode);renderer.setPixelRatio(ratio);composer.setPixelRatio(ratio);bloom.enabled=mode!=='low';ao.enabled=mode==='high'&&!touch;aa.enabled=touch?mode!=='low':true;/* Performance on a phone: MSAA alone, no SMAA passes */dither.enabled=touch?mode==='high':mode!=='low';resize();}
+ function quality(mode){currentMode=mode;puddles.quality(touch?(mode==='high'?'balanced':'low'):mode);const ratio=ratioFor(mode);renderer.setPixelRatio(ratio);composer.setPixelRatio(ratio);bloom.enabled=mode!=='low';ao.enabled=mode==='high'&&!touch;aa.enabled=touch?mode!=='low':true;/* Performance on a phone: MSAA alone, no SMAA passes */if(touch)setSamples(aa.enabled?0:2);dither.enabled=touch?mode==='high':mode!=='low';resize();}
+ // A changed sample count takes effect when the target is re-created on its next use.
+ function setSamples(samples){for(const t of [composer.renderTarget1,composer.renderTarget2])if(t.samples!==samples){t.samples=samples;t.dispose();}}
  renderer.info.autoReset=false;
  // Optimization pass (16 Sep): the boss's slam and burst effects are hidden until
  // first used, so their shaders compiled mid-fight - three 125-132 ms freezes in
@@ -419,7 +426,7 @@ export function createRendering(canvas,{touch=false}={}) {
  // Post hooks for the fight (round 3). shock() takes a WORLD position: it is projected with the final camera at
  // render time, so a ring started in the fixed step lands where the impact is on screen this frame. The ring
  // runs out over shockLife seconds; a second shock while one runs restarts it at the stronger of the two.
- const shock={pos:new T.Vector3(),strength:0,age:1,life:.5},flashColor=new T.Color(1,.75,.5);let flashStrength=0,lastRender=0;
+ const shock={pos:new T.Vector3(),strength:0,age:1,life:.5},flashColor=new T.Color(1,.75,.5);let flashStrength=0,lastRender=0,shadowFrame=0;
  const projected=new T.Vector3();
  const post={
   shock(at,strength=1){if(!at)return;const left=Math.max(0,1-shock.age/shock.life)*shock.strength;shock.pos.set(at.x,Number.isFinite(at.y)?at.y:.3,at.z);shock.strength=Math.max(left,Math.min(1.2,strength));shock.age=0;},
@@ -438,7 +445,7 @@ export function createRendering(canvas,{touch=false}={}) {
   u.uFlash.value.set(flashColor.r,flashColor.g,flashColor.b,flashStrength);
   flashStrength*=Math.exp(-dt*9);if(flashStrength<.002)flashStrength=0;
  }
- function render(){const now=performance.now()/1000;puddles.update(now);grade.uniforms.time.value=now;dither.uniforms.time.value=now;updatePost(now);renderer.info.reset();
+ function render(){const now=performance.now()/1000;puddles.update(now);grade.uniforms.time.value=now;dither.uniforms.time.value=now;updatePost(now);renderer.info.reset();if(touch&&(shadowFrame++&1)===0)renderer.shadowMap.needsUpdate=true;
    // Mirror first, as its own top-level render (see puddles.renderMirror); when it ran it already refreshed the shadow maps for this frame.
    const shadowAuto=renderer.shadowMap.autoUpdate,mirrored=puddles.renderMirror(renderer,scene,camera);
    if(mirrored)renderer.shadowMap.autoUpdate=false;
