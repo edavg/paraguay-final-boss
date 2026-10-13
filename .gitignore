@@ -202,3 +202,8 @@ assets/combat-revision/boss/v62-paced-aimed-slam/*
 
 # Python bytecode caches (one was tracked by accident)
 __pycache__/
+
+# The boss's rules (attacks, weights, timings) are game code: the build imports this manifest (13 Oct 2026).
+!docs/boss-man/
+docs/boss-man/*
+!docs/boss-man/boss-man-rig-v1-manifest.json
