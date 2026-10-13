@@ -303,16 +303,17 @@ export const REST={bossHeat:.30,bossHeat2:.42,playerHeat:.22,aura:.42,aura2:.60,
 
 /** Everything the fight needs to feel heavy, assembled in one place so
  * src/game/main.js only gains a handful of call sites. */
-/** `post` (optional) is rendering.js's post-process hook: shock(worldPos,strength) for the refraction ring, flash(rgb,strength). */
+/** `post` (optional) is rendering.js's post-process hook: shock(worldPos,strength) for the refraction ring, flash(rgb,strength).
+ * The ember and wisp pools follow `effects.density` (the touch path thins them with the rest of the particles). */
 export function createCombatEffects({scene,camera,effects,actors,fight,audio,post=null}={}){
- const boss=actors.boss,player=actors.player;
- const bossFire=createWeaponFire(boss.weapon,boss.weaponSegment,{scene,boss:true,embers:110});
+ const boss=actors.boss,player=actors.player,density=effects.density??1,pool=n=>Math.max(4,Math.round(n*density));
+ const bossFire=createWeaponFire(boss.weapon,boss.weaponSegment,{scene,boss:true,embers:pool(110)});
  // Round 3: the exile's steel burns a little hotter (.40 -> .55) and leaves a real trail (user: "our sword's visual effect").
- const playerFire=createWeaponFire(player.weapon,player.weaponSegment,{scene,boss:false,embers:36,gain:.55});
+ const playerFire=createWeaponFire(player.weapon,player.weaponSegment,{scene,boss:false,embers:pool(36),gain:.55});
  // 40 samples so the flurry can lengthen the trail's life without a new buffer.
  const bossTrail=new BladeTrail(scene,{samples:40,life:.24,opacity:.42,smoke:1,name:'Scythe trail'});
  const playerTrail=new BladeTrail(scene,{samples:24,life:.20,opacity:.30,smoke:.8,name:'Steel trail'});
- const aura=createBossAura(boss.body.getObjectByName('mixamorigHead'),scene,{scale:boss.worldScale||1});
+ const aura=createBossAura(boss.body.getObjectByName('mixamorigHead'),scene,{scale:boss.worldScale||1,wisps:pool(64)});
  const impacts=new GroundImpacts(scene);
  const cleave=new FireCleave(scene);
  const burst=new BossBurst(scene,{radius:3.2});

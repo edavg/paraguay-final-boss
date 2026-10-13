@@ -148,3 +148,12 @@ test('the phone light budget: 4 pooled candles, 3 uplights, shadowless cookies, 
  assert.ok(read('src/game/weapon-fire.js').includes('light.userData.weaponLight=true;'),'the weapon fire lights are marked to stay');
  assert.ok(rendering.includes("aa.enabled=touch?mode!=='low':true;"),'SMAA stays on for every desktop preset');
 });
+
+test('touch particle density: counts thin to the density on average and the desktop (1) is untouched',async()=>{
+ const {scaledCount}=await import('../src/game/effects.js');
+ assert.equal(scaledCount(90,1),90);assert.equal(scaledCount(1,1),1);
+ let total=0;for(let i=0;i<4000;i++)total+=scaledCount(1,.4);
+ assert.ok(Math.abs(total/4000-.4)<.05,`a one-mote emitter still emits ${(total/4000).toFixed(2)} per call`);
+ const heavy=scaledCount(96,.4);assert.ok(heavy===38||heavy===39,`96 -> ${heavy}`);
+ assert.match(read('src/game/main.js'),/new Effects\(scene,\{density:touchMode\?\.4:1\}\)/,'only the touch path thins the particles');
+});

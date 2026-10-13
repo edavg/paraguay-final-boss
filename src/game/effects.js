@@ -9,8 +9,17 @@ const DUST=280,CHIPS=96;
 const DEFAULT_DUST=new T.Color(0x73736c);
 // Tints arrive as hex literals from the hot path; cache the Colors they mean.
 const TINTS=new Map();
+/** A particle count scaled by a density, rounded stochastically so a one-particle emitter still emits on average. */
+export function scaledCount(count,density=1){
+ if(density>=1)return count;
+ const exact=count*density,whole=Math.floor(exact);
+ return whole+(Math.random()<exact-whole?1:0);
+}
 export class Effects{
- constructor(scene){this.scene=scene;this.pool=[];this.dustPool=[];this.chipPool=[];const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(new Float32Array(240*3),3));g.setAttribute('color',new T.Float32BufferAttribute(new Float32Array(240*3),3));
+ /** `density` (0..1) thins every spawned spark, dust mote and chip: the touch path (17 Sep 2026 mobile pass, extended
+  * 13 Oct 2026) runs at .4, since the big soft dust sprites are the heaviest overdraw on a phone GPU. Fewer motes are
+  * drawn a little more opaque so a slam still reads as a cloud. The desktop keeps 1, exactly as shipped. */
+ constructor(scene,{density=1}={}){this.scene=scene;this.density=density;this.dustOpacity=density>=1?1:Math.min(1.6,1/Math.sqrt(density));this.pool=[];this.dustPool=[];this.chipPool=[];const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(new Float32Array(240*3),3));g.setAttribute('color',new T.Float32BufferAttribute(new Float32Array(240*3),3));
  const sparkMaterial=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,vertexColors:true,
   vertexShader:'varying vec3 vColor;void main(){vColor=color;vec4 p=modelViewMatrix*vec4(position,1.);gl_Position=projectionMatrix*p;gl_PointSize=clamp(35./max(1.,-p.z),1.5,7.);}',
   fragmentShader:'varying vec3 vColor;void main(){float r=length(gl_PointCoord-.5)*2.;gl_FragColor=vec4(vColor,pow(max(0.,1.-r),2.));\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n}'});
@@ -23,18 +32,18 @@ export class Effects{
  this.dust=new T.Points(dustGeometry,dustMaterial);this.dust.frustumCulled=false;this.dust.userData.noPuddleReflection=true;scene.add(this.dust);
  this.chips=new T.InstancedMesh(new T.TetrahedronGeometry(.024),new T.MeshStandardMaterial({color:0x77756e,roughness:1,metalness:0}),CHIPS);this.chips.instanceMatrix.setUsage(T.DynamicDrawUsage);this.chips.count=0;this.chips.frustumCulled=false;scene.add(this.chips);this.chipTransform=new T.Object3D();
  }
- burst(at,color=0xffb96e,count=22,flash=12){const c=new T.Color(color).multiplyScalar(2);for(let i=0;i<count;i++){if(this.pool.length>=240)this.pool.shift();this.pool.push({p:new T.Vector3(at.x,at.y,at.z),v:new T.Vector3((Math.random()-.5)*4,Math.random()*3,(Math.random()-.5)*4),life:.2+Math.random()*.45,c:c.clone()});}this.flash.position.copy(at);this.flash.color.set(color);this.flash.intensity=Math.max(this.flash.intensity,flash);}
+ burst(at,color=0xffb96e,count=22,flash=12){count=scaledCount(count,this.density);const c=new T.Color(color).multiplyScalar(2);for(let i=0;i<count;i++){if(this.pool.length>=240)this.pool.shift();this.pool.push({p:new T.Vector3(at.x,at.y,at.z),v:new T.Vector3((Math.random()-.5)*4,Math.random()*3,(Math.random()-.5)*4),life:.2+Math.random()*.45,c:c.clone()});}this.flash.position.copy(at);this.flash.color.set(color);this.flash.intensity=Math.max(this.flash.intensity,flash);}
  impact(at,direction=new T.Vector3(),shield=false){
   const color=new T.Color(shield?0xc8d4df:0xc9a574).multiplyScalar(1.7);
-  for(let i=0;i<(shield?13:9);i++){if(this.pool.length>=240)this.pool.shift();this.pool.push({p:at.clone(),v:new T.Vector3((Math.random()-.5)*2.5,Math.random()*1.8,(Math.random()-.5)*2.5).addScaledVector(direction,.65),life:.12+Math.random()*.2,c:color.clone()});}
+  for(let i=0,n=scaledCount(shield?13:9,this.density);i<n;i++){if(this.pool.length>=240)this.pool.shift();this.pool.push({p:at.clone(),v:new T.Vector3((Math.random()-.5)*2.5,Math.random()*1.8,(Math.random()-.5)*2.5).addScaledVector(direction,.65),life:.12+Math.random()*.2,c:color.clone()});}
   this.flash.position.copy(at);this.flash.color.set(shield?0xc8d4df:0xffb66b);this.flash.intensity=shield?3.8:2.6;
  }
  ground(point,weight=1,{dust=1}={}){
   const at=point.clone?point:new T.Vector3(point.x,point.y??0,point.z);
-  const count=dust<=0?0:weight<.5?2:7;
-  for(let i=0;i<count;i++){if(this.dustPool.length>=DUST)this.dustPool.shift();const life=.35+Math.random()*.45;this.dustPool.push({p:at.clone().add(new T.Vector3((Math.random()-.5)*.14,.015,(Math.random()-.5)*.14)),v:new T.Vector3((Math.random()-.5)*.7,Math.random()*.35+.05,(Math.random()-.5)*.7).multiplyScalar(weight),life,total:life,size:(.18+Math.random()*.18)*Math.max(.5,weight),opacity:(weight<.5?.12:.28)*dust,tint:DEFAULT_DUST,seed:Math.random()*9.7});}
+  const count=dust<=0?0:scaledCount(weight<.5?2:7,this.density);
+  for(let i=0;i<count;i++){if(this.dustPool.length>=DUST)this.dustPool.shift();const life=.35+Math.random()*.45;this.dustPool.push({p:at.clone().add(new T.Vector3((Math.random()-.5)*.14,.015,(Math.random()-.5)*.14)),v:new T.Vector3((Math.random()-.5)*.7,Math.random()*.35+.05,(Math.random()-.5)*.7).multiplyScalar(weight),life,total:life,size:(.18+Math.random()*.18)*Math.max(.5,weight),opacity:(weight<.5?.12:.28)*dust*this.dustOpacity,tint:DEFAULT_DUST,seed:Math.random()*9.7});}
   // Heavy blade contacts loosen a few fragments; ordinary steps stay fine dust.
-  if(weight>=.55)for(let i=0;i<Math.ceil(weight*5);i++){
+  if(weight>=.55)for(let i=0,n=scaledCount(Math.ceil(weight*5),this.density);i<n;i++){
    if(this.chipPool.length>=CHIPS)this.chipPool.shift();const life=.65+Math.random()*.45;
    this.chipPool.push({p:new T.Vector3(at.x,.028,at.z),v:new T.Vector3((Math.random()-.5)*1.6,.5+Math.random()*.75,(Math.random()-.5)*1.6).multiplyScalar(weight),r:new T.Vector3(Math.random()*6,Math.random()*6,Math.random()*6),spin:new T.Vector3(Math.random()*9,Math.random()*9,Math.random()*9),scale:new T.Vector3(.5+Math.random()*.6,.25+Math.random()*.4,.7+Math.random()*.9),life,bounced:false});
   }
@@ -45,6 +54,7 @@ export class Effects{
  dustWall(at,{count=12,radius=.4,speed=2.5,rise=1,size=.5,opacity=.3,tint=DEFAULT_DUST,direction=null,growth=1.8,life=.55}={}){
   const colour=tint instanceof T.Color?tint:(TINTS.get(tint)||TINTS.set(tint,new T.Color(tint)).get(tint));
   const y=Number.isFinite(at.y)?at.y:.05;
+  count=scaledCount(count,this.density);opacity=Math.min(1,opacity*this.dustOpacity);
   for(let i=0;i<count;i++){
    if(this.dustPool.length>=DUST)this.dustPool.shift();
    const angle=Math.random()*Math.PI*2,spread=Math.sqrt(Math.random());
