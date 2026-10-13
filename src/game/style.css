@@ -65,13 +65,21 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{ou
 
 /* ─── loading ──────────────────────────────────────────────────────────── */
 #loading{position:fixed;inset:0;background:#000;z-index:10;color:var(--cap);overflow:hidden}
-/* assets/ui/loader-cathedral.jpg (generated, docs/asset-plan.md): a ruined nave at the top of the black, bleeding out at every edge */
-.load-art{position:absolute;left:50%;top:0;transform:translateX(-50%);width:min(1500px,100vw);height:68vh;
- background:url(../../assets/ui/loader-cathedral.jpg) center 30%/cover no-repeat;opacity:.62;filter:saturate(.45) contrast(1.08) brightness(.8);
- mask-image:linear-gradient(180deg,#000 0%,#000 45%,transparent 100%),linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);
- -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 45%,transparent 100%),linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);
- mask-composite:intersect;-webkit-mask-composite:source-in;animation:ink 2.4s ease-out both}
-.load-art::after{content:'';position:absolute;inset:0;background:var(--stain) 0 0/260px 260px repeat;opacity:.9}
+/* The Paraguayan loader (13 Oct 2026, built in code, no generation; docs/asset-plan.md): an ash-red sky and a
+   ñandutí in the flag's colours (assets/ui/nanduti.webp, the user's own photo, docs/references/user-nanduti-flag.png) turning slowly above the title like a gothic rose window.
+   assets/ui/loader-cathedral.jpg, the previous art, stays on disk. */
+.load-sky{position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% 0%,#4a0c07cc 0%,#22050388 45%,transparent 75%);animation:emerge 2.4s ease-out both}
+.load-nanduti{position:absolute;left:50%;top:36vh;width:min(62vh,88vw);aspect-ratio:1;translate:-50% -50%;
+ background:url(../../assets/ui/nanduti.webp) center/contain no-repeat;opacity:.8;filter:brightness(.62) saturate(.8) contrast(1.1) drop-shadow(0 0 10px #4a0c07);
+ mask-image:radial-gradient(circle,#000 58%,transparent 74%);-webkit-mask-image:radial-gradient(circle,#000 58%,transparent 74%);
+ animation:emerge 3.2s ease-out both,turn 240s linear infinite}
+/* falling ash: assets/ui/ash.svg (scattered specks) at two scales drifting at different speeds */
+.load-ash{position:absolute;inset:0;pointer-events:none;opacity:.6;
+ background:url(../../assets/ui/ash.svg) 0 0/480px 480px,url(../../assets/ui/ash.svg) 170px 90px/300px 300px;animation:ash 22s linear infinite}
+@keyframes emerge{from{opacity:0}}/* fades in to each layer's own opacity (ink would end at 1) */
+@keyframes turn{to{rotate:360deg}}
+@keyframes ash{to{background-position:-90px 480px,230px 690px}}
+@media (prefers-reduced-motion:reduce){.load-nanduti,.load-ash{animation:emerge 2.4s ease-out both}}
 .load-text{position:absolute;left:0;right:0;top:70vh;display:flex;flex-direction:column;align-items:center;gap:clamp(10px,1vw,20px)}
 .load-rule{position:relative;width:clamp(200px,19vw,420px);height:1px;background:var(--iron);
  mask-image:var(--grunge);-webkit-mask-image:var(--grunge);mask-size:120px 120px;-webkit-mask-size:120px 120px}
