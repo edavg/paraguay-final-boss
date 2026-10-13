@@ -52,6 +52,14 @@ export function createActionTimings(metadata={},boss=false){
   }
   if(merged.radial&&!(merged.reach>0))throw new RangeError(`actions.${name}: a radial action needs a positive reach`);
   if(merged.linear&&!(merged.reach>0&&merged.width>0))throw new RangeError(`actions.${name}: a linear action needs a positive reach and width`);
+  if(merged.targeted){
+   if(!(merged.reach>0)||!Number.isFinite(merged.lockAt))throw new RangeError(`actions.${name}: a targeted action needs a positive reach (pillar radius) and a lockAt clip time`);
+   merged.pillars=Object.fromEntries(Object.entries(spec.pillars||{}).map(([phase,offsets])=>{
+    if(!Array.isArray(offsets)||!offsets.length||!offsets.every(o=>Array.isArray(o)&&o.length===2&&o.every(Number.isFinite)))throw new RangeError(`actions.${name}: pillars.${phase} must list [side, ahead] offsets`);
+    return [phase,offsets.map(o=>o.map(value=>value*scale))];
+   }));
+   if(!merged.pillars.phase1)throw new RangeError(`actions.${name}: a targeted action needs pillars.phase1`);
+  }
   timings[name]=merged;
  }
  return timings;
@@ -68,6 +76,26 @@ export function linearContact(spec,action,geometry={}){
  const along=Number.isFinite(geometry.along)?geometry.along:geometry.distance,lateral=Math.abs(geometry.lateral??0);
  const radius=Number.isFinite(geometry.playerRadius)?geometry.playerRadius:.45;
  return Number.isFinite(along)&&along>=.5&&along<=front&&lateral<=spec.width*.5+radius;
+}
+/** A targeted action (the pillars) marks the floor around the player and erupts there: the centres are the player's
+ * position plus `pillars.phase<n>` offsets, [side, ahead] metres across and along the boss-to-player direction.
+ * Positions come from geometry.playerX/Z and bossX/Z (world metres); an old geometry without them uses the boss's
+ * facing frame, the boss at the origin. */
+export function pillarCenters(spec,phase,geometry={}){
+ if(!spec?.targeted)return [];
+ const world=Number.isFinite(geometry.playerX);
+ const px=world?geometry.playerX:geometry.lateral??0,pz=world?geometry.playerZ:geometry.along??geometry.distance??0;
+ const bx=world?geometry.bossX??0:0,bz=world?geometry.bossZ??0:0;
+ const dx=px-bx,dz=pz-bz,length=Math.hypot(dx,dz),ux=length>1e-6?dx/length:0,uz=length>1e-6?dz/length:1;
+ return (spec.pillars['phase'+phase]||spec.pillars.phase1).map(([side,ahead])=>({x:px+uz*side+ux*ahead,z:pz-ux*side+uz*ahead}));
+}
+/** The pillars hit a player standing within `reach` (plus their own radius) of any locked centre. */
+export function pillarContact(spec,action,geometry={}){
+ if(!spec?.targeted||!action?.targets)return false;
+ const world=Number.isFinite(geometry.playerX);
+ const px=world?geometry.playerX:geometry.lateral??0,pz=world?geometry.playerZ:geometry.along??geometry.distance??0;
+ const radius=Number.isFinite(geometry.playerRadius)?geometry.playerRadius:.45;
+ return action.targets.some(c=>Math.hypot(px-c.x,pz-c.z)<=spec.reach+radius);
 }
 /** Where the fissure's front is right now, 0..1 of the reach (0 before the window). */
 export function linearProgress(spec,action){

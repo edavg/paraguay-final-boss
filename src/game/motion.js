@@ -281,6 +281,8 @@ export class MotionState {
       along: dx*hx+dz*hz,
       lateral: dx*hz-dz*hx,
       playerRadius: this.dimensions.player.bodyRadius,
+      // World positions for the pillars, which lock onto the floor rather than the boss's frame.
+      playerX: this.player.x, playerZ: this.player.z, bossX: this.boss.x, bossZ: this.boss.z,
     };
   }
 }

@@ -1,5 +1,5 @@
 import {Vector3} from 'three';
-const footActions=new Set(['dodge','light','light2','heavy','sweep','slam']);
+const footActions=new Set(['dodge','light','light2','heavy','sweep','slam','delayedSlam']);
 
 /** Detect planted feet from the evaluated skeleton, not a speed-based metronome. */
 export class FootContacts{

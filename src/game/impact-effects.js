@@ -4,6 +4,7 @@ import {BladeTrail} from './blade-trail.js';
 import {createBossAura} from './boss-aura.js';
 import {BossBurst} from './boss-burst.js';
 import {BossFissure} from './boss-fissure.js';
+import {pillarCenters} from './weapon-motion.js';
 import {weaponGroundContact} from './contact-feedback.js';
 import {strikeIndex,linearProgress} from './weapon-motion.js';
 
@@ -318,6 +319,8 @@ export function createCombatEffects({scene,camera,effects,actors,fight,audio,pos
  const cleave=new FireCleave(scene);
  const burst=new BossBurst(scene,{radius:3.2});
  const fissure=new BossFissure(scene);
+ // The pillars: one narrow, tall burst per column (three at most, phase two).
+ const pillars=[0,1,2].map(()=>new BossBurst(scene,{radius:1.2,height:3.6}));
  const tip=new T.Vector3(),previousTip=new T.Vector3(),direction=new T.Vector3(),lowest=new T.Vector3();
  const inner=new T.Vector3(),outer=new T.Vector3(),along=new T.Vector3(),origin=new T.Vector3(),front=new T.Vector3();
  let bossHeat=REST.bossHeat,playerHeat=REST.playerHeat,pendingShake=0,pendingHitStop=0,pendingFov=0,bladeFlash=0,sweepEmit=0,fissureEmit=0;
@@ -346,7 +349,7 @@ export function createCombatEffects({scene,camera,effects,actors,fight,audio,pos
  }
 
  return{
-  bossFire,playerFire,bossTrail,playerTrail,aura,impacts,cleave,burst,fissure,
+  bossFire,playerFire,bossTrail,playerTrail,aura,impacts,cleave,burst,fissure,pillars,
   get state(){return{bossHeat,playerHeat,bossFlash,auraSpike};},
   /** Called from the fixed-step update, where the blade segments are fresh.
    * Returns the camera kick the frame should apply. */
@@ -364,6 +367,7 @@ export function createCombatEffects({scene,camera,effects,actors,fight,audio,pos
    auraSpike=Math.max(0,auraSpike-step*1.1);auraFlare=Math.max(0,auraFlare-step*2.6);
    if(bossAction?.name!=='burst'&&burst.warnLevel>0)burst.warnAt(boss.root.position,0);
    if(bossAction?.name!=='fissure'&&fissure.warn.visible)fissure.warnAt(null,0,0,0);
+   if(!fight.timings.boss[bossAction?.name]?.targeted)for(const pillar of pillars)if(pillar.warnLevel>0)pillar.warnAt(pillar.at,0);
    const bossMoved=pushTrail(bossTrail,boss,bossHeat);
    pushTrail(playerTrail,player,playerHeat);
 
@@ -450,11 +454,36 @@ export function createCombatEffects({scene,camera,effects,actors,fight,audio,pos
       }
      }
     }
+    // Pillars (13 Oct 2026): rings of coals follow the player through the windup and lock to the floor when the
+    // scythe is planted (the rule's own lockAt - the cleave carries the cut into the stone there); when the window
+    // opens a column of dark fire erupts in each ring. Centres come from the fight once locked, so the fire is
+    // exactly where the hit is.
+    if(timing?.targeted&&!bossAction.fxPillars){
+     const start=timing.hitWindows?.[0]?.[0]??timing.windup,power=fight.boss.phase===2?1.2:1;
+     const centers=bossAction.targets||pillarCenters(timing,fight.boss.phase,{playerX:player.root.position.x,playerZ:player.root.position.z,bossX:boss.root.position.x,bossZ:boss.root.position.z});
+     if(bossAction.targets&&!bossAction.fxGround&&boss.segment){tip.set(...boss.segment[1]);bossAction.fxGround=true;
+      cleave.strike(tip,{x:tip.x,y:.04,z:tip.z},{life:.6,width:1.8*power,yaw:cutYaw(boss.segment)});play('slam',.55,boss.root.position);pendingShake=Math.max(pendingShake,.22);}
+     if(bossAction.elapsed>=start&&bossAction.targets){
+      bossAction.fxPillars=true;
+      bossAction.targets.forEach((at,i)=>{const pillar=pillars[i];if(!pillar)return;pillar.radius=timing.reach;
+       const contact=lowest.set(at.x,.04,at.z);pillar.erupt(contact,{power,life:1.15});
+       impacts.strike(contact,{power:power*.8,radius:timing.reach*1.2,ringLife:.32,decalLife:2.6,flash:3.4});
+       effects.dustWall(contact,{count:30,radius:.4,speed:3*power,size:.36,opacity:.12,tint:0x6e5f4c,growth:2.2,life:.55,rise:1.4});
+       effects.burst({x:at.x,y:.8,z:at.z},0xd4682a,18,3.4);play('fire',1,contact);});
+      post?.shock(lowest.set(bossAction.targets[0].x,.04,bossAction.targets[0].z),.7*power);
+      pendingShake=Math.max(pendingShake,.42*power);pendingHitStop=Math.max(pendingHitStop,.05);pendingFov=2;
+      bossFlash=1;auraSpike=Math.max(auraSpike,.8);auraFlare=1;
+     }else{
+      // Dim while they follow, brightening once locked toward the eruption.
+      const level=bossAction.targets?.45+.55*Math.min(1,(bossAction.elapsed-timing.lockAt)/Math.max(.1,start-timing.lockAt)):.45*Math.pow(Math.min(1,bossAction.elapsed/Math.max(.1,timing.lockAt)),1.5);
+      pillars.forEach((pillar,i)=>{pillar.radius=timing.reach;pillar.warnAt(centers[i]||pillar.at,centers[i]?level:0);if(centers[i])pillar.at.set(centers[i].x,0,centers[i].z);});
+     }
+    }
     // The slam lands when the blade bottoms out inside its damage window. The
     // authored clip stops the edge ~0.17 m above the floor, so a real crossing
     // is used when there is one and the fire cleave carries the cut down when
     // there is not — either way the impact is on the flagstones.
-    if(strike>=0&&bossAction.name==='slam'&&!bossAction.fxGround&&boss.segment){
+    if(strike>=0&&(bossAction.name==='slam'||bossAction.name==='delayedSlam')&&!bossAction.fxGround&&boss.segment){
      const crossing=weaponGroundContact(boss.previousSegment,boss.segment);
      tip.set(...boss.segment[1]);
      const rising=bossAction.fxLowest!=null&&tip.y>bossAction.fxLowest+.012;
@@ -484,12 +513,12 @@ export function createCombatEffects({scene,camera,effects,actors,fight,audio,pos
     }
     // While the cut finishes, the cleave stays welded to the blade edge, so the
     // weapon and the gash in the stone are one continuous thing.
-    if((bossAction.name==='slam'||bossAction.name==='burst'||bossAction.name==='fissure')&&bossAction.fxGround&&boss.segment){
+    if((timing?.clip??bossAction.name)==='slam'&&bossAction.fxGround&&boss.segment){
      tip.set(...boss.segment[1]);
      if(tip.y<2.4)cleave.track(tip,lowest.set(tip.x,.04,tip.z));
     }
     // The sweep displaces a wall of air and grit along the whole arc.
-    if(strike>=0&&bossAction.name!=='slam'&&bossAction.name!=='fissure'){
+    if(strike>=0&&!['slam','delayedSlam','fissure','pillars'].includes(bossAction.name)){
      sweepEmit+=step;
      if(sweepEmit>=.022&&boss.segment){
       sweepEmit=0;
@@ -558,6 +587,7 @@ export function createCombatEffects({scene,camera,effects,actors,fight,audio,pos
    if(type==='boss-tell'){
     if(aura)aura.state.threat=Math.max(aura.state.threat,.45);
     if(action==='burst')auraSpike=Math.max(auraSpike,.55);
+    if(action==='pillars')auraSpike=Math.max(auraSpike,.45);
    }
   },
   /** Called once per rendered frame, where the camera is final. */
@@ -583,12 +613,13 @@ export function createCombatEffects({scene,camera,effects,actors,fight,audio,pos
    cleave.update(step,time);
    burst.update(step,time);
    fissure.update(step,time,camera);
+   for(const pillar of pillars)pillar.update(step,time);
   },
   reset(){
    bossHeat=REST.bossHeat;playerHeat=REST.playerHeat;bladeFlash=0;bossFlash=0;auraSpike=0;auraFlare=0;pendingShake=0;pendingHitStop=0;pendingFov=0;sweepEmit=.022;fissureEmit=0;eventShake=0;eventHitStop=0;eventFov=0;
    bossTrail.life=.24;bossTrail.uniforms.uOpacity.value=.42;bossTrail.uniforms.uSmoke.value=1;
-   bossFire?.reset();playerFire?.reset();bossTrail.reset();playerTrail.reset();aura?.reset();impacts.reset();cleave.reset();burst.reset();fissure.reset();
+   bossFire?.reset();playerFire?.reset();bossTrail.reset();playerTrail.reset();aura?.reset();impacts.reset();cleave.reset();burst.reset();fissure.reset();for(const pillar of pillars)pillar.reset();
   },
-  dispose(){bossFire?.dispose();playerFire?.dispose();bossTrail.dispose();playerTrail.dispose();aura?.dispose();impacts.dispose();cleave.dispose();burst.dispose();fissure.dispose();}
+  dispose(){bossFire?.dispose();playerFire?.dispose();bossTrail.dispose();playerTrail.dispose();aura?.dispose();impacts.dispose();cleave.dispose();burst.dispose();fissure.dispose();for(const pillar of pillars)pillar.dispose();}
  };
 }

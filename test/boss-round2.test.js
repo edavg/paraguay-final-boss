@@ -82,33 +82,35 @@ test('the flurry resolves two independent cuts; a hit on the first does not cove
  assert.equal(fight.player.health,80);assert.equal(fight.stats.hits,1);
  run(fight,.5,geo({bossHit:true}));
  assert.equal(fight.player.health,60,'the return pass lands its own hit');assert.equal(fight.stats.hits,2);
- run(fight,3,geo({bossHit:true,distance:12}));
+ run(fight,3,geo({bossHit:true,distance:14}));
  assert.equal(fight.player.health,60);assert.equal(fight.boss.action,null,'the flurry ends after its 4.9 clip seconds and nothing starts out of range');
  assert.equal(fight.bossCooldown(timings.flurry),.75);fight.boss.phase=2;assert.equal(fight.bossCooldown(timings.sweep),.8*ASSETS.motion.boss.phaseTwoCooldownMultiplier);
 });
 
 test('weighted selection only offers attacks whose band contains the player and never the same one three times running',()=>{
- assert.deepEqual(bossAttackSequence(boss,1).sort(),['burst','fissure','flurry','slam','sweep']);
+ assert.deepEqual(bossAttackSequence(boss,1).sort(),['burst','delayedSlam','fissure','flurry','pillars','slam','sweep']);
  const names=distance=>bossEngagement(boss,1,distance,0,{random:0}).eligible.map(e=>e.name).sort();
  assert.deepEqual(names(1.6),['burst','flurry','sweep']);
- assert.deepEqual(names(2.8),['burst','slam']);
- assert.deepEqual(names(3.2),['fissure','slam']);
- assert.deepEqual(names(5),['fissure'],'past the slam band only the fissure reaches');
- assert.deepEqual(names(9.5),[]);
- const far=bossEngagement(boss,1,9.5,0,{random:0});
- assert.equal(far.selected,null);assert.ok(Math.abs(far.targetDistance-3.9)<1e-5,'walks to the fissure band first (preferred 3.0 authored = 3.9 world)');
+ assert.deepEqual(names(2.8),['burst','delayedSlam','slam']);
+ assert.deepEqual(names(3.2),['delayedSlam','fissure','slam']);
+ assert.deepEqual(names(5),['fissure','pillars'],'past the slam band the fissure and the pillars reach');
+ assert.deepEqual(names(9.5),['pillars'],'past the fissure only the pillars reach');
+ assert.deepEqual(names(14),[]);
+ const far=bossEngagement(boss,1,14,0,{random:0});
+ assert.equal(far.selected,null);assert.ok(Math.abs(far.targetDistance-6.5)<1e-5,'walks to the pillars band first (preferred 5.0 authored = 6.5 world)');
  const exhausted=bossEngagement(boss,1,3.2,4,{random:.5,history:['slam','slam']});
  assert.equal(exhausted.selected.name,'fissure','a third slam in a row is refused and the fissure takes the band');
- const spent=bossEngagement(boss,1,8,4,{random:.5,history:['fissure','fissure']});
- assert.equal(spent.selected,null,'a third fissure in a row is refused');
- assert.ok(spent.targetDistance<3.4,'and the boss walks in to the slam band instead of standing still');
- const fresh=bossEngagement(boss,1,3.2,4,{random:.5,history:['sweep','slam']});
+ assert.equal(bossEngagement(boss,1,8,4,{random:.5,history:['fissure','fissure']}).selected.name,'pillars','a third fissure in a row is refused and the pillars take the band');
+ const spent=bossEngagement(boss,1,11,4,{random:.5,history:['pillars','pillars']});
+ assert.equal(spent.selected,null,'a third pillars in a row is refused');
+ assert.ok(spent.targetDistance<8.6,'and the boss walks in to the fissure band instead of standing still');
+ const fresh=bossEngagement(boss,1,3.2,4,{random:.3,history:['sweep','slam']});
  assert.equal(fresh.selected.name,'slam');assert.equal(fresh.selected.nextIndex,5);
  for(let i=0;i<40;i++){const pick=bossEngagement(boss,2,1.6,0,{random:i/40,history:['flurry','flurry']}).selected.name;assert.notEqual(pick,'flurry');}
  assert.equal(bossEngagement(boss,1,1.6,0,{random:0,forced:'burst'}).selected.name,'burst','the forced opener wins when eligible');
  assert.equal(bossEngagement(boss,1,3.2,0,{random:0,forced:'burst'}).selected.name,'slam','and is ignored out of its band');
  let draws=0;bossEngagement(boss,1,1.6,0,{random:()=>{draws++;return .5;}});assert.equal(draws,1,'one draw per choice');
- draws=0;bossEngagement(boss,1,12,0,{random:()=>{draws++;return .5;}});assert.equal(draws,0,'no draw when nothing is eligible');
+ draws=0;bossEngagement(boss,1,14,0,{random:()=>{draws++;return .5;}});assert.equal(draws,0,'no draw when nothing is eligible');
  assert.throws(()=>bossEngagement(boss,1,1.6,0,{random:1}),RangeError);
 });
 
@@ -147,11 +149,11 @@ test('a full scripted fight replays identically at 30, 60 and 120 Hz and after a
 
 test('the approach agrees with the fight: an exhausted band walks the boss in, the phase-two walk keeps the gait inside its rate clamp',()=>{
  const fight=new Fight(ASSETS.motion),motion=new MotionState({animationMetadata:ASSETS.motion,approachDistance:ASSETS.motion.boss.approachDistance});fight.start();fight.cooldown=0;
- motion.boss={x:0,z:0,yaw:0};motion.player={x:0,z:8,yaw:Math.PI};fight.history=['fissure','fissure'];
+ motion.boss={x:0,z:0,yaw:0};motion.player={x:0,z:11,yaw:Math.PI};fight.history=['pillars','pillars'];
  for(let i=0;i<1500&&!fight.boss.action;i++){motion.step(1/120,{},fight);fight.step(1/120,motion.geometry());}
- assert.ok(fight.boss.action,'the boss did not stall at fissure range after two fissures');
- assert.notEqual(fight.boss.action.name,'fissure');
- assert.ok(motion.geometry().distance<3.4,'it walked into the slam band to attack');
+ assert.ok(fight.boss.action,'the boss did not stall at pillars range after two pillars');
+ assert.notEqual(fight.boss.action.name,'pillars');
+ assert.ok(motion.geometry().distance<8.6,'it walked into the fissure band to attack');
  const walk=ASSETS.motion.boss.clips['walk-forward'].sourceSpeed;
  assert.ok(ASSETS.motion.boss.locomotionSpeed/walk<=1.4+1e-9,'phase one walk within the 1.4x clip rate clamp');
  assert.ok(ASSETS.motion.boss.locomotionSpeed*ASSETS.motion.boss.phaseTwoWalkMultiplier/walk<=1.4+1e-9,'phase two walk within the clamp');

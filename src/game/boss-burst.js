@@ -11,7 +11,7 @@ import {EMBER_RAMP_GLSL,FIRE_NOISE_GLSL} from './weapon-fire.js';
 //  - the SMOKE RING: a normal-blended near-black shell just outside the fire, so
 //    the eruption keeps a silhouette against a dark cathedral (the hood's lesson).
 // The shockwave, grit, embers, camera kick, aura and scythe flare are raised by
-// createCombatEffects on the same frame.
+// createCombatEffects on the same frame. The pillars reuse it: a narrow, tall ring is a column of fire.
 
 const FLAT_VERTEX=`varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
 const WARN_FRAGMENT=`
@@ -95,8 +95,8 @@ const SMOKE_FRAGMENT=`
 const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
 
 export class BossBurst{
- constructor(scene,{radius=3.2}={}){
-  this.scene=scene;this.radius=radius;this.time=0;this.life=0;this.active=false;this.warnLevel=0;this.power=1;this.at=new T.Vector3();
+ constructor(scene,{radius=3.2,height=1.5}={}){
+  this.scene=scene;this.radius=radius;this.height=height;this.time=0;this.life=0;this.active=false;this.warnLevel=0;this.power=1;this.at=new T.Vector3();
   const plane=new T.PlaneGeometry(1,1,1,1);plane.rotateX(-Math.PI/2);
   this.warnUniforms={uTime:{value:0},uWarn:{value:0},uSeed:{value:1.3}};
   this.warn=new T.Mesh(plane,new T.ShaderMaterial({uniforms:this.warnUniforms,transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,vertexShader:FLAT_VERTEX,fragmentShader:WARN_FRAGMENT,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}));
@@ -145,7 +145,7 @@ export class BossBurst{
   // The ring races out from the feet to the reach in a quarter second, stands,
   // then the tongues die from the top down while the smoke lingers a little.
   const reach=this.radius*(.30+.70*smooth(this.time/.24));
-  const height=(1.5+this.power*.5)*(.55+.45*smooth(this.time/.18))*(1-smooth((age-.35)/.65)*.72);
+  const height=(this.height+this.power*.5)*(.55+.45*smooth(this.time/.18))*(1-smooth((age-.35)/.65)*.72);
   this.wall.position.set(this.at.x,.02,this.at.z);this.wall.scale.set(reach,height,reach);
   this.smoke.position.set(this.at.x,.02,this.at.z);this.smoke.scale.set(reach*1.05,height*1.12,reach*1.05);
   this.wallUniforms.uTime.value=time;this.wallUniforms.uLife.value=Math.pow(1-age,.8);
