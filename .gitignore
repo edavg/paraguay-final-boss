@@ -207,3 +207,7 @@ __pycache__/
 !docs/boss-man/
 docs/boss-man/*
 !docs/boss-man/boss-man-rig-v1-manifest.json
+# The boss model the game loads on desktop (13 Oct 2026); the phone copy is under assets/mobile/.
+!assets/boss-man/
+assets/boss-man/*
+!assets/boss-man/boss-man-rig-v1.glb
