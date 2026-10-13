@@ -27,8 +27,8 @@ export const ASSETS={
  footstep:new URL('../../assets/a-single-muted-heavy-armored-boot-footst-cmu1i7mt.mp3',import.meta.url).href,
  playerShield:new URL('../../assets/create-the-exact-isolated-player-shield-cmu12nf3.glb',import.meta.url).href,
  playerSword:new URL('../../assets/create-the-exact-isolated-player-sword-s-cmu12ngf.glb',import.meta.url).href,
- stone:new URL('../../assets/ancient-gothic-cathedral-limestone-mason-cmu1fw79.png',import.meta.url).href,
- floor:new URL('../../assets/ancient-dark-cathedral-flagstone-floor-l-cmu1fw8c.png',import.meta.url).href,
+ stone:new URL('../../assets/webp/ancient-gothic-cathedral-limestone-mason-cmu1fw79.webp',import.meta.url).href,
+ floor:new URL('../../assets/webp/ancient-dark-cathedral-flagstone-floor-l-cmu1fw8c.webp',import.meta.url).href,
  // The one music track (13 Oct 2026, the load pass): the choir, formerly "Coro de pavor" in the pause menu.
  // The other three tracks are no longer bundled; the files stay in assets/.
  music:new URL('../../assets/a-dark-gothic-boss-battle-theme-slow-and-cmu4dws4.mp3',import.meta.url).href,
@@ -39,41 +39,41 @@ export const ASSETS={
  bossRoar:new URL('../../assets/sfx/boss-awaken-roar-cmu37rfo.mp3',import.meta.url).href,
  // Cathedral surfaces and fittings (stream A). The banner atlas, lancet glass
  // and wall grunge are cropped and de-fringed copies of the generated PNGs.
- cathedralFloor:new URL('../../assets/seamless-tiling-ancient-cathedral-flagst-cmu38eyn.jpg',import.meta.url).href,
- cathedralWall:new URL('../../assets/seamless-tiling-weathered-gothic-limesto-cmu38f00.jpg',import.meta.url).href,
- cathedralOak:new URL('../../assets/seamless-tiling-very-dark-oxidised-oak-c-cmu38f1h.jpg',import.meta.url).href,
- cathedralMetal:new URL('../../assets/seamless-tiling-tarnished-brass-and-wrou-cmu38f45.jpg',import.meta.url).href,
- lancetGlass:new URL('../../assets/environment/lancet-glass.png',import.meta.url).href,
- bannerAtlas:new URL('../../assets/environment/banner-atlas.png',import.meta.url).href,
- wallGrunge:new URL('../../assets/environment/wall-grunge.png',import.meta.url).href,
- windowCookie:new URL('../../assets/greyscale-light-cookie-gobo-mask-three-t-cmu38gk1.png',import.meta.url).href,
+ cathedralFloor:new URL('../../assets/webp/seamless-tiling-ancient-cathedral-flagst-cmu38eyn.webp',import.meta.url).href,
+ cathedralWall:new URL('../../assets/webp/seamless-tiling-weathered-gothic-limesto-cmu38f00.webp',import.meta.url).href,
+ cathedralOak:new URL('../../assets/webp/seamless-tiling-very-dark-oxidised-oak-c-cmu38f1h.webp',import.meta.url).href,
+ cathedralMetal:new URL('../../assets/webp/seamless-tiling-tarnished-brass-and-wrou-cmu38f45.webp',import.meta.url).href,
+ lancetGlass:new URL('../../assets/webp/environment/lancet-glass.webp',import.meta.url).href,
+ bannerAtlas:new URL('../../assets/webp/environment/banner-atlas.webp',import.meta.url).href,
+ wallGrunge:new URL('../../assets/webp/environment/wall-grunge.webp',import.meta.url).href,
+ windowCookie:new URL('../../assets/webp/greyscale-light-cookie-gobo-mask-three-t-cmu38gk1.webp',import.meta.url).href,
  // Cloth relief and the chancel swag row (stream A, second session). Both were
  // generated last night and were sitting on disk wired to nothing.
- bannerDamask:new URL('../../assets/environment/banner-damask.jpg',import.meta.url).href,
- valanceSwag:new URL('../../assets/environment/valance-swag.png',import.meta.url).href,
+ bannerDamask:new URL('../../assets/webp/environment/banner-damask.webp',import.meta.url).href,
+ valanceSwag:new URL('../../assets/webp/environment/valance-swag.webp',import.meta.url).href,
  // Round 2, 16 Sep (stream ENV): three floor paving sets blended by a world-
  // space zone mask, the wall relief and a debris sprite sheet. The texture lane
  // returns base colour only on this account, so every *-nr.png is a normal map
  // (xyz) with roughness packed in alpha, derived from the photograph by
  // scripts/derive-pbr-maps.py. The wall relief is derived from cathedralWall
  // itself so its joints and streaks match the albedo exactly.
- floorFlagstoneGrey:new URL('../../assets/environment/floor-flagstone-grey.jpg',import.meta.url).href,
- floorFlagstoneGreyNR:new URL('../../assets/environment/floor-flagstone-grey-nr.png',import.meta.url).href,
+ floorFlagstoneGrey:new URL('../../assets/webp/environment/floor-flagstone-grey.webp',import.meta.url).href,
+ floorFlagstoneGreyNR:new URL('../../assets/webp/environment/floor-flagstone-grey-nr.webp',import.meta.url).href,
  // The nave set: black basalt, the only floor since 13 Oct 2026 (the load pass removed the pause-menu Floor choice
  // and with it the chequer and diagonal-marble sets; their files stay in assets/environment/).
- floorBasalt:new URL('../../assets/environment/floor-basalt.jpg',import.meta.url).href,
- floorBasaltNR:new URL('../../assets/environment/floor-basalt-nr.png',import.meta.url).href,
- floorTomb:new URL('../../assets/environment/floor-tomb.jpg',import.meta.url).href,
- floorTombNR:new URL('../../assets/environment/floor-tomb-nr.png',import.meta.url).href,
- wallAshlarNR:new URL('../../assets/environment/wall-ashlar-nr.png',import.meta.url).href,
- debrisAtlas:new URL('../../assets/environment/debris-atlas.png',import.meta.url).href,
+ floorBasalt:new URL('../../assets/webp/environment/floor-basalt.webp',import.meta.url).href,
+ floorBasaltNR:new URL('../../assets/webp/environment/floor-basalt-nr.webp',import.meta.url).href,
+ floorTomb:new URL('../../assets/webp/environment/floor-tomb.webp',import.meta.url).href,
+ floorTombNR:new URL('../../assets/webp/environment/floor-tomb-nr.webp',import.meta.url).href,
+ wallAshlarNR:new URL('../../assets/webp/environment/wall-ashlar-nr.webp',import.meta.url).href,
+ debrisAtlas:new URL('../../assets/webp/environment/debris-atlas.webp',import.meta.url).href,
  // Round 3 (16 Sep evening, graphics pass): a 2x2 atlas of floor damage decals (shattered slab, crack, crater,
  // rubble scatter), de-fringed copy of the generated sheet, laid over the fighting floor by arena.js.
- floorDamageAtlas:new URL('../../assets/environment/floor-damage-atlas.png',import.meta.url).href,
+ floorDamageAtlas:new URL('../../assets/webp/environment/floor-damage-atlas.webp',import.meta.url).href,
  // Round 4 (17 Sep, afternoon): the funerary seal inlaid in the fighting floor, a generated top-down inlay with alpha
  // between the metal (prepared by scripts/prepare-floor-seal.py) and a normal map derived from it.
- floorSeal:new URL('../../assets/environment/floor-seal.png',import.meta.url).href,
- floorSealNR:new URL('../../assets/environment/floor-seal-nr.png',import.meta.url).href,
+ floorSeal:new URL('../../assets/webp/environment/floor-seal.webp',import.meta.url).href,
+ floorSealNR:new URL('../../assets/webp/environment/floor-seal-nr.webp',import.meta.url).href,
  // The user's chosen combat sounds (round 2, stream FX): lists of takes from
  // docs/round-2-2026-09-16/sounds-chosen.json, falling back to the old pair.
  playerHitArmor:chosenSounds('playerHitArmor',[new URL('../../assets/one-powerful-heavy-steel-scythe-impact-a-cmu1fwan.mp3',import.meta.url).href]),
@@ -97,7 +97,7 @@ export const MOBILE_ASSETS={
  playerShield:new URL('../../assets/mobile/player-shield.glb',import.meta.url).href,
  monument:new URL('../../assets/mobile/funerary-monument.glb',import.meta.url).href,
  monumentLod:new URL('../../assets/mobile/funerary-monument-lod.glb',import.meta.url).href,
- floorSeal:new URL('../../assets/mobile/floor-seal.png',import.meta.url).href,
- floorSealNR:new URL('../../assets/mobile/floor-seal-nr.png',import.meta.url).href,
+ floorSeal:new URL('../../assets/webp/mobile/floor-seal.webp',import.meta.url).href,
+ floorSealNR:new URL('../../assets/webp/mobile/floor-seal-nr.webp',import.meta.url).href,
 };
 

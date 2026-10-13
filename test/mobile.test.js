@@ -111,6 +111,14 @@ function glbImages(file){
   return{width:0,height:0};})};
 }
 
+// The seal ships as WebP since 13 Oct 2026: the width from a VP8X, VP8L or VP8 header.
+function webpWidth(bytes){
+ const chunk=bytes.toString('ascii',12,16);
+ if(chunk==='VP8X')return 1+bytes.readUIntLE(24,3);
+ if(chunk==='VP8L')return 1+(bytes.readUInt16LE(21)&0x3fff);
+ return bytes.readUInt16LE(26)&0x3fff;
+}
+
 test('the phone copies exist, keep the mesh, rig and clips, and carry no texture above 1024; the desktop table still points at the originals',()=>{
  const pairs=[['playerRig','playerRig'],['bossRig','bossRig'],['scythe','scythe'],['playerSword','playerSword'],['playerShield','playerShield']];
  for(const [mobileKey,desktopKey] of pairs){
@@ -123,7 +131,7 @@ test('the phone copies exist, keep the mesh, rig and clips, and carry no texture
   for(const key of ['meshes','skins','animations','materials','nodes','accessors'])assert.equal(JSON.stringify(a.doc[key]),JSON.stringify(b.doc[key]),`${mobileKey}: ${key} identical`);
  }
  for(const key of ['monument','monumentLod'])for(const image of glbImages(fileURLToPath(MOBILE_ASSETS[key])).images)assert.ok(image.width<=1024,`${key} ${image.width}`);
- for(const key of ['floorSeal','floorSealNR']){const bytes=readFileSync(fileURLToPath(MOBILE_ASSETS[key]));assert.equal(bytes.readUInt32BE(16),1024,key+' is 1024 wide');}
+ for(const key of ['floorSeal','floorSealNR'])assert.equal(webpWidth(readFileSync(fileURLToPath(MOBILE_ASSETS[key]))),1024,key+' is 1024 wide');
  const main=read('src/game/main.js');
  assert.ok(main.includes('const paths=touchMode?{...ASSETS,...MOBILE_ASSETS}:ASSETS'),'the swap happens only on the touch path');
  assert.ok(read('src/game/actors.js').includes('serial:false')||read('src/game/actors.js').includes('serial=false'),'serial loading is opt-in');
