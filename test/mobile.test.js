@@ -143,7 +143,9 @@ test('the phone light budget: 4 pooled candles, 3 uplights, shadowless cookies, 
  assert.ok(arena.includes('const LIGHT_POOL=texturePaths.lightPool??9,lightBudget=!!texturePaths.lightBudget;'),'the pool defaults to 9');
  assert.ok(arena.includes('.filter(([z])=>!lightBudget||Math.abs(z)<=6)'),'all five uplights without a budget');
  assert.ok(arena.includes('spot.castShadow=!lightBudget;'),'cookie spots cast shadows without a budget');
- assert.ok(main.includes('lightPool:touchMode?4:9,lightBudget:touchMode'),'main.js budgets the phone only');
+ assert.ok(main.includes('lightPool:touchMode?4:9,lightBudget:touchMode,particleBudget:touchMode'),'main.js budgets the phone only');
+ assert.ok(arena.includes('for(const z of particleBudget?[-14]:[-14,-4,9])'),'three haze curtains without a budget, one on the phone');
+ assert.ok(arena.includes('const MOTES=particleBudget?200:600,BEAM_MOTES=particleBudget?80:240;'),'600 dust motes without a budget');
  assert.ok(main.includes("if(touchMode)scene.traverse(o=>{if(o.isLight&&o.userData.cosmetic&&!o.userData.weaponLight)o.visible=false;});"),'effect flashes off on the phone, before the first frame');
  assert.ok(read('src/game/weapon-fire.js').includes('light.userData.weaponLight=true;'),'the weapon fire lights are marked to stay');
  assert.ok(rendering.includes("aa.enabled=touch?mode!=='low':true;"),'SMAA stays on for every desktop preset');
@@ -155,5 +157,5 @@ test('touch particle density: counts thin to the density on average and the desk
  let total=0;for(let i=0;i<4000;i++)total+=scaledCount(1,.4);
  assert.ok(Math.abs(total/4000-.4)<.05,`a one-mote emitter still emits ${(total/4000).toFixed(2)} per call`);
  const heavy=scaledCount(96,.4);assert.ok(heavy===38||heavy===39,`96 -> ${heavy}`);
- assert.match(read('src/game/main.js'),/new Effects\(scene,\{density:touchMode\?\.4:1\}\)/,'only the touch path thins the particles');
+ assert.match(read('src/game/main.js'),/new Effects\(scene,\{density:touchMode\?\.25:1\}\)/,'only the touch path thins the particles');
 });

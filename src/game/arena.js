@@ -771,8 +771,11 @@ export async function buildArena(scene,texturePaths={}){
     float alpha=body*(1.-smoothstep(0.,7.,vW.y))*edge*.075;
     gl_FragColor=vec4(mix(vec3(.010,.015,.021),vec3(.030,.021,.014),smoothstep(-6.,-16.,vW.z)),alpha);
    }`});
+ // The phone keeps only the far curtain behind the boss (13 Oct 2026, the user: the smoke cost too many frames): each
+ // curtain is a 26 x 9 m plane running two 3D noise octaves per pixel, the heaviest overdraw in the room.
+ const particleBudget=!!texturePaths.particleBudget;
  const fogPlanes=[];
- for(const z of [-14,-4,9]){
+ for(const z of particleBudget?[-14]:[-14,-4,9]){
   const curtain=new T.Mesh(new T.PlaneGeometry(26,9),hazeMat);
   curtain.position.set(0,4.2,z);curtain.userData.noPuddleReflection=true;
   curtain.castShadow=false;curtain.receiveShadow=false;curtain.renderOrder=2;
@@ -780,11 +783,12 @@ export async function buildArena(scene,texturePaths={}){
  }
  // Dust: 240 of the 600 motes ride the nine moonlight shafts, the rest stay
  // ambient. Additive plus vertex colours gives the ~8x brightness ratio between
- // a mote inside a beam and one in the dark without a custom shader.
- const positions=new Float32Array(600*3),dustColor=new Float32Array(600*3),dustPhase=new Float32Array(600);
+ // a mote inside a beam and one in the dark without a custom shader. The phone budget draws a third of them.
+ const MOTES=particleBudget?200:600,BEAM_MOTES=particleBudget?80:240;
+ const positions=new Float32Array(MOTES*3),dustColor=new Float32Array(MOTES*3),dustPhase=new Float32Array(MOTES);
  const shaftBearing=v(11,-17,11).normalize(),shaftZ=[-13.1,-10.9,-7.1,-4.9,-1.1,1.1,5.1,7.1,11.1];
- for(let i=0;i<600;i++){
-  const beam=i<240;
+ for(let i=0;i<MOTES;i++){
+  const beam=i<BEAM_MOTES;
   if(beam){
    const z=shaftZ[i%9],t=rand()*17.1;
    const p=v(-12.55,12.6,z).addScaledVector(shaftBearing,t);

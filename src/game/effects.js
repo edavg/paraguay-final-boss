@@ -17,7 +17,7 @@ export function scaledCount(count,density=1){
 }
 export class Effects{
  /** `density` (0..1) thins every spawned spark, dust mote and chip: the touch path (17 Sep 2026 mobile pass, extended
-  * 13 Oct 2026) runs at .4, since the big soft dust sprites are the heaviest overdraw on a phone GPU. Fewer motes are
+  * 13 Oct 2026) runs at .25 (.4 until the second 13 Oct pass), since the big soft dust sprites are the heaviest overdraw on a phone GPU. Fewer motes are
   * drawn a little more opaque so a slam still reads as a cloud. The desktop keeps 1, exactly as shipped. */
  constructor(scene,{density=1}={}){this.scene=scene;this.density=density;this.dustOpacity=density>=1?1:Math.min(1.6,1/Math.sqrt(density));this.pool=[];this.dustPool=[];this.chipPool=[];const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(new Float32Array(240*3),3));g.setAttribute('color',new T.Float32BufferAttribute(new Float32Array(240*3),3));
  const sparkMaterial=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,vertexColors:true,

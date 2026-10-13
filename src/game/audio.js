@@ -13,7 +13,7 @@ export const SOUNDS=['footstep','impact','swing','groundSlam','darkFire','bossRo
 // The round-2 takes all peak within 1 dB of 0 dBFS; the trims below put the
 // chosen files at comparable loudness (RMS measured with ffmpeg astats, see
 // docs/round-2-2026-09-16/FX-notes.md) with the boss's hit on top.
-export const SOUND_LEVEL={swing:.6,darkFire:.5,groundSlam:1,bossRoar:.7,playerHitArmor:.8,bossSwing:.7,bossHitPlayer:1,playerSwing:.55,block:.85,terereSip:.75};
+export const SOUND_LEVEL={swing:.6,darkFire:.5,groundSlam:1,bossRoar:.7,playerHitArmor:.8,bossSwing:.7,bossHitPlayer:1,playerSwing:.55,block:.85,terereSip:.5}; // terereSip .75 -> .5 (13 Oct 2026, the user: a bit quieter)
 export const soundLevel=name=>SOUND_LEVEL[name]??.8;
 /** The round-2 slots are lists of generated takes whose loudness differs by up
  * to 8 dB (RMS -13.7 to -27.4 dBFS, ffmpeg astats). Each take is brought to a
