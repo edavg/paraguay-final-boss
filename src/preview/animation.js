@@ -26,17 +26,17 @@ const rawComparison = new URLSearchParams(location.search).get('review') === 'ra
 const videoReview = leanReview || rawComparison || new URLSearchParams(location.search).get('review') === 'video-motion';
 const singleBossReview = idleStudy || videoReview;
 if(combatBossReview||combatPlayerReview){
- document.querySelector('.sidebar-footer').firstChild.textContent=(combatPlayerReview?'Player motion':'Boss attack')+' correction under review. Not yet used in the game.';
+ document.querySelector('.sidebar-footer').firstChild.textContent=(combatPlayerReview?'Movimiento del jugador':'Ataque del jefe')+' en revisión de corrección. Aún no se usa en el juego.';
 }
 if(combatBossReview){
  const comparison=document.createElement('a');
  comparison.href=capturedArmsReview?'?review=combat-boss':'?review=combat-boss&arms=captured';
- comparison.textContent=capturedArmsReview?'Compare rejected IK draft ↗':'Compare captured arm motion ↗';
+ comparison.textContent=capturedArmsReview?'Comparar el borrador IK rechazado ↗':'Comparar el movimiento de brazos capturado ↗';
  comparison.style.display='block';comparison.style.marginTop='12px';
  document.querySelector('.sidebar-footer').append(comparison);
 }
 const reviewClip = leanReview ? 'idle-forward-lean' : rawComparison ? (new URLSearchParams(location.search).get('take') === 'video' ? 'idle-video-retry' : 'idle-text-retry') : videoReview ? 'idle-video' : 'idle-study';
-const textPrompt = 'Two-handed polearm idle. Staggered flat feet, soft knees, hips centered, slight forward lean. Hands apart ahead of chest. Slow inhale, shoulders rise; slow exhale, settle. No steps or shaking.';
+const textPrompt = 'Reposo de arma larga a dos manos. Pies planos escalonados, rodillas sueltas, caderas centradas, leve inclinación al frente. Las manos separadas delante del pecho. Inhalación lenta, los hombros suben; exhalación lenta, se asienta. Sin pasos ni tirones.';
 let referenceVideo = null;
 function syncReference(force = false) {
  if (!referenceVideo || !Number.isFinite(referenceVideo.duration)) return;
@@ -49,36 +49,36 @@ function syncReference(force = false) {
  else referenceVideo.pause();
 }
 const descriptions = {
- 'idle-forward-lean': ['Forward lean · 5°', 'Pelvis, torso and scythe lean forward together. Both boots stay planted. Switch to Before lean to compare at the same moment.'],
- 'idle-video': ['Current cleanup', 'The version under review, including Blender posture and grip corrections. Compare its knees and hand movement with Raw Uthana.'],
- 'idle-video-raw': ['Raw Uthana', 'The supplied video motion on this mesh, shifted to floor height only. Equipment is hidden because Uthana supplied body motion without a weapon attachment.'],
- 'idle-video-retry': ['Video retry · raw', 'The new video request returned exactly the same motion as the first extraction. No pose corrections. Equipment hidden; body motion only.'],
- 'idle-text-retry': ['Text take · raw', 'A new text-to-motion take on the same skeleton. No pose, grip, foot or loop corrections. Equipment hidden; body motion only.'],
- 'idle-study': ['New idle', 'A breathing and stance study. Compare the weight, shoulders and scythe clearance with Previous idle.'],
- idle: ['Idle', 'The kept combat guard. The boss’s approved quarter-speed breathing is baked into this clip.'],
- 'walk-forward': ['Walk', 'A deliberate forward advance. The moving grid helps you check each planted foot.'],
- 'run-forward': ['Run', 'Forward movement. The moving grid helps you check foot contact and stride speed.'],
- sweep: ['Scythe sweep', 'A broad two-handed attack. Check both hands through the entire swing.'],
- slam: ['Overhead slam', capturedArmsReview?'Captured strike with a preparatory release and regrip, corrected arm rotation and planted boots. Final encounter checks are still in progress.':'A raised windup followed by a heavy downward strike.'],
- combo: ['Double sweep', 'Two committed swings, with a short delay between them.'],
- awaken: ['Phase change', 'The transition into the boss’s second phase.'],
- death: ['Death', 'The character collapses. Turn Loop off to hold the ending.'],
- light: ['Light attack', 'A quick sword cut followed by its recovery.'],
- heavy: ['Heavy attack', 'A slower, heavier sword strike.'],
- block: ['Shield guard', 'The shield is held in front of the character.'],
- dodge: ['Forward roll', 'A forward shoulder roll with a crouched landing. Enable ground travel to check its movement.'],
- heal: ['Heal', 'The recovery gesture used when drinking an ember draught.'],
- hit: ['Hit reaction', 'The brief recoil when the character takes a hit.'],
+ 'idle-forward-lean': ['Inclinación al frente · 5°', 'La pelvis, el torso y la guadaña se inclinan al frente a la vez. Ambas botas quedan asentadas. Cambia a Antes de la inclinación para comparar en el mismo instante.'],
+ 'idle-video': ['Limpieza actual', 'La versión en revisión, con las correcciones de postura y empuñadura hechas en Blender. Compara sus rodillas y el movimiento de las manos con Uthana en bruto.'],
+ 'idle-video-raw': ['Uthana en bruto', 'El movimiento del vídeo suministrado sobre esta malla, desplazado solo hasta la altura del suelo. El equipo está oculto porque Uthana entregó movimiento corporal sin arma acoplada.'],
+ 'idle-video-retry': ['Reintento de vídeo · en bruto', 'La nueva petición de vídeo devolvió exactamente el mismo movimiento que la primera extracción. Sin corrección de pose. Equipo oculto; solo movimiento del cuerpo.'],
+ 'idle-text-retry': ['Toma de texto · en bruto', 'Una nueva toma de texto a movimiento sobre el mismo esqueleto. Sin correcciones de pose, empuñadura, pies ni bucle. Equipo oculto; solo movimiento del cuerpo.'],
+ 'idle-study': ['Nuevo reposo', 'Un estudio de respiración y postura. Compara el peso, los hombros y el despeje de la guadaña con Reposo anterior.'],
+ idle: ['Reposo', 'La guardia de combate conservada. La respiración aprobada del jefe a cuarto de velocidad está integrada en este clip.'],
+ 'walk-forward': ['Caminar', 'Un avance deliberado al frente. La cuadrícula móvil te ayuda a comprobar cada pie asentado.'],
+ 'run-forward': ['Correr', 'Movimiento al frente. La cuadrícula móvil te ayuda a comprobar el contacto de los pies y la velocidad de la zancada.'],
+ sweep: ['Barrido de guadaña', 'Un ataque amplio a dos manos. Comprueba ambas manos durante todo el barrido.'],
+ slam: ['Golpe descendente', capturedArmsReview?'Golpe capturado con una liberación preparatoria y rempresa, rotación de brazos corregida y botas asentadas. Las comprobaciones finales del encounter siguen en marcha.':'Un remonte en alto seguido de un golpe pesado hacia abajo.'],
+ combo: ['Doble barrido', 'Dos barridos comprometidos, con una pausa breve entre ambos.'],
+ awaken: ['Cambio de fase', 'La transición a la segunda fase del jefe.'],
+ death: ['Muerte', 'El personaje se desploma. Desactiva el Bucle para mantener el final.'],
+ light: ['Ataque ligero', 'Un corte rápido de espada seguido de su recuperación.'],
+ heavy: ['Ataque fuerte', 'Un golpe más lento y pesado de espada.'],
+ block: ['Guardia con escudo', 'El escudo se mantiene delante del personaje.'],
+ dodge: ['Rodadura al frente', 'Una rodadura de hombro al frente con aterrizaje en cuclillas. Activa el desplazamiento sobre el suelo para comprobar su recorrido.'],
+ heal: ['Sanación', 'Se cuelga el escudo al antebrazo y toma tereré de la guampa: tres sorbos de la bombilla.'],
+ hit: ['Reacción al golpe', 'El retroceso breve cuando el personaje recibe un golpe.'],
 };
 const orders = {
  boss: ['idle','walk-forward','run-forward','sweep','slam','combo','hit','awaken','death'],
  player: ['idle','light','heavy','block','dodge','heal','hit','death'],
 };
 function label(name) {
- if(combatPlayerReview&&name==='dodge')return 'Forward roll';
- if (leanReview && name === 'idle-video') return 'Before lean';
- if (rawComparison && name === 'idle-video') return 'Kept IK version';
- if (singleBossReview && name === 'idle') return 'Previous idle';
+ if(combatPlayerReview&&name==='dodge')return 'Rodadura al frente';
+ if (leanReview && name === 'idle-video') return 'Antes de la inclinación';
+ if (rawComparison && name === 'idle-video') return 'Versión IK conservada';
+ if (singleBossReview && name === 'idle') return 'Reposo anterior';
  if (descriptions[name]) return descriptions[name][0];
  return name.replace(/^run-/, 'Run · ').replace(/^walk-/, 'Walk · ').replaceAll('-', ' ');
 }
@@ -125,9 +125,9 @@ function updatePlaybackSpeed(){
 }
 
 function playingUI() {
- $('play').textContent = playing ? 'Ⅱ Pause' : '▶ Play';
- $('play').setAttribute('aria-label', playing ? 'Pause animation' : 'Play animation');
- $('playback-status').textContent = playing ? 'Playing' : time >= duration ? 'Finished' : 'Paused';
+ $('play').textContent = playing ? 'Ⅱ Pausa' : '▶ Reproducir';
+ $('play').setAttribute('aria-label', playing ? 'Pausar la animación' : 'Reproducir la animación');
+ $('playback-status').textContent = playing ? 'Reproduciendo' : time >= duration ? 'Terminado' : 'Pausado';
 }
 function setPlaying(value) {
  if (!ready) return;
@@ -185,10 +185,10 @@ function updateGroundTravel() {
 }
 function timelineUI() {
  $('timeline').value = String(time);
- $('timeline').setAttribute('aria-valuetext', `${time.toFixed(2)} of ${duration.toFixed(2)} seconds`);
+ $('timeline').setAttribute('aria-valuetext', `${time.toFixed(2)} de ${duration.toFixed(2)} segundos`);
  $('time-readout').textContent = `${time.toFixed(2)} / ${duration.toFixed(2)} s`;
  const spec = timing(clipName);
- $('phase').textContent = transitionMode ? transitionPhase(time,actor.isBoss).toUpperCase() : spec ? time < spec.windup ? 'WINDUP' : time < spec.windup + spec.active ? 'STRIKE' : 'RECOVERY' : '';
+ $('phase').textContent = transitionMode ? transitionPhase(time,actor.isBoss).toUpperCase() : spec ? time < spec.windup ? 'CARGA' : time < spec.windup + spec.active ? 'GOLPE' : 'RECUPERACIÓN' : '';
 }
 function hold(value) { setPlaying(false); loopCount=0; seek(value); timelineUI(); playingUI(); syncReference(true); }
 
@@ -215,16 +215,16 @@ function buildClipList() {
 function buildPoseControls() {
  const spec = timing(clipName);
  $('phase-track').replaceChildren(); $('pose-buttons').replaceChildren();
- $('pose-help').textContent = spec ? 'Jump to a pose, then step through it.' : 'Drag the timeline to pause on any pose.';
+ $('pose-help').textContent = spec ? 'Salta a una pose y avanza por ella.' : 'Arrastra la línea de tiempo para pausar en cualquier pose.';
  if (!spec) return;
  for (const amount of [spec.windup, spec.active, spec.recovery]) {
   const segment = document.createElement('span'); segment.style.width = `${amount / duration * 100}%`;
   $('phase-track').append(segment);
  }
- const poses = [['Windup', spec.windup * .7]];
- if (clipName === 'combo') poses.push(['First strike', spec.windup + spec.active * .2], ['Second strike', spec.windup + spec.active * .82]);
- else poses.push(['Strike', spec.hitWindows?.length ? (spec.hitWindows[0][0]+spec.hitWindows[0][1])*.5 : spec.windup + spec.active * .5]);
- poses.push(['Recovery', spec.windup + spec.active + spec.recovery * .5]);
+ const poses = [['Carga', spec.windup * .7]];
+ if (clipName === 'combo') poses.push(['Primer golpe', spec.windup + spec.active * .2], ['Segundo golpe', spec.windup + spec.active * .82]);
+ else poses.push(['Golpe', spec.hitWindows?.length ? (spec.hitWindows[0][0]+spec.hitWindows[0][1])*.5 : spec.windup + spec.active * .5]);
+ poses.push(['Recuperación', spec.windup + spec.active + spec.recovery * .5]);
  for (const [name, at] of poses) {
   const button = document.createElement('button'); button.type = 'button'; button.textContent = name;
   button.addEventListener('click', () => hold(at)); $('pose-buttons').append(button);
@@ -314,23 +314,23 @@ function selectClip(name) {
  if (videoReview) {
   const raw = !['idle-video','idle-forward-lean'].includes(name);
   actor.weapon.visible = !raw && $('weapons').checked;
-  actor.cloth.visible = !raw && $('cloth').checked;
+  actor.cloth.visible = !raw && $('cloth').checked && actor.metadata?.cloth!==false;
   $('weapons').disabled = raw; $('cloth').disabled = raw;
   if (rawComparison) {
    const text = name === 'idle-text-retry';
    referenceVideo.hidden = text;
-   document.querySelector('.source-heading').textContent = text ? 'Text input' : 'Approved video';
+   document.querySelector('.source-heading').textContent = text ? 'Entrada de texto' : 'Vídeo aprobado';
    document.querySelector('.text-motion-prompt').hidden = !text;
-   document.querySelector('.source-note').textContent = text ? 'The text take has no source video. Compare its body motion with the other takes.' : 'Play, pause and scrub both views together.';
+   document.querySelector('.source-note').textContent = text ? 'La toma de texto no tiene vídeo de origen. Compara su movimiento corporal con las otras tomas.' : 'Reproduce, pausa y recorre ambas vistas a la vez.';
   }
  }
  for (const button of document.querySelectorAll('[data-clip]')) button.setAttribute('aria-pressed', String(button.dataset.clip === name));
  $('stage-animation').textContent = label(name);
- $('clip-description').textContent = descriptions[name]?.[1] || 'Directional movement, shown in place so you can inspect the footwork.';
- if(combatPlayerReview&&name==='dodge')$('clip-description').textContent='A captured forward shoulder roll, with reconstructed travel and a crouched recovery.';
- if(name==='idle'&&!actor.isBoss)$('clip-description').textContent='A grounded sword-and-shield guard with restrained breathing. Watch the knees, shoulders and cloth settle.';
- if (rawComparison && name === 'idle-video') $('clip-description').textContent = 'Your existing IK-corrected idle, preserved without changes. The new text and video takes are separate.';
- if (leanReview && name === 'idle-video') $('clip-description').textContent = 'The kept IK idle before the forward lean. This version is unchanged.';
+ $('clip-description').textContent = descriptions[name]?.[1] || 'Movimiento direccional, mostrado in situ para que examines el juego de pies.';
+ if(combatPlayerReview&&name==='dodge')$('clip-description').textContent='Una rodadura de hombro al frente capturada, con desplazamiento reconstruido y una recuperación en cuclillas.';
+ if(name==='idle'&&!actor.isBoss)$('clip-description').textContent='Una guardia de espada y escudo, asentada y de respiración contenida. Observa cómo se asientan rodillas, hombros y tela.';
+ if (rawComparison && name === 'idle-video') $('clip-description').textContent = 'Tu reposo existente ya corregido con IK, conservado sin cambios. Las nuevas tomas de texto y vídeo van aparte.';
+ if (leanReview && name === 'idle-video') $('clip-description').textContent = 'El reposo IK conservado, antes de la inclinación al frente. Esta versión no cambia.';
  $('timeline').max = String(duration);
  buildPoseControls(); measureAnimation(); if (!compareState) fitView(); seek(compareState?.time ?? 0); timelineUI(); setPlaying(compareState?.playing ?? true);
 }
@@ -343,8 +343,8 @@ function startTransitionPreview(){
  activeAction=null;actionState=null;
  for(const button of document.querySelectorAll('[data-clip]'))button.setAttribute('aria-pressed','false');
  $('transition-preview').setAttribute('aria-pressed','true');
- $('stage-animation').textContent=actor.isBoss?'Walk → stop':'Run → stop';
- $('clip-description').textContent='The character starts moving, then settles back into idle. Watch the boots, knees and cloth through the transition.';
+ $('stage-animation').textContent=actor.isBoss?'Caminar → parada':'Correr → parada';
+ $('clip-description').textContent='El personaje empieza a moverse y vuelve a asentarse en el reposo. Observa botas, rodillas y tela a lo largo de la transición.';
  $('travel-option').hidden=true;$('timeline').max=String(duration);
  buildPoseControls();fitView(['hands','body','head'].includes(viewName)?'quarter':viewName);timelineUI();setPlaying(true);
 }
@@ -355,8 +355,8 @@ function selectCharacter(name) {
  if(combatBossReview||combatPlayerReview){
   const candidateName=combatPlayerReview?'player':'boss';
   document.querySelector('.sidebar-footer').firstChild.textContent=name===candidateName
-   ? name==='player'?'Player forearm correction is now in the development game.':capturedArmsReview?'Corrected attacks are now in the development game. Final encounter checks are in progress.':'Rejected draft: shoulder and elbow deformation is being repaired. Not used in the game.'
-   : `Current game animation. Select ${candidateName==='player'?'Player':'Boss'} to review the new corrections.`;
+   ? name==='player'?'La corrección de antebrazo del jugador ya está en el juego en desarrollo.':capturedArmsReview?'Los ataques corregidos ya están en el juego en desarrollo. Las comprobaciones finales del encounter siguen en marcha.':'Borrador rechazado: se está reparando la deformación de hombro y codo. No se usa en el juego.'
+   : `Animación actual del juego. Selecciona ${candidateName==='player'?'Jugador':'Jefe'} para revisar las nuevas correcciones.`;
  }
  const playerDimensions=actorDimensions(false,actors.player.metadata),bossDimensions=actorDimensions(true,actors.boss.metadata);
  const minDistance=(playerDimensions.bodyRadius??playerDimensions.groundRadius)+(bossDimensions.bodyRadius??bossDimensions.groundRadius)+.05;
@@ -367,10 +367,10 @@ function selectCharacter(name) {
  opponent.update(1/60,0,opponentState,{x:0,z:Number($('opponent-distance').value),yaw:Math.PI});
  actor.weapon.visible = $('weapons').checked;
  if (actor.shield) actor.shield.visible = $('weapons').checked;
- actor.cloth.visible = $('cloth').checked;
+ actor.cloth.visible = $('cloth').checked && actor.metadata?.cloth!==false;
  $('character-name').textContent = actor.root.name;
  $('stage-character').textContent = actor.root.name.toUpperCase();
- $('transition-preview').textContent=name==='boss'?'Walk → stop':'Run → stop';
+ $('transition-preview').textContent=name==='boss'?'Caminar → parada':'Correr → parada';
  for (const button of document.querySelectorAll('[data-actor]')) button.setAttribute('aria-pressed', String(button.dataset.actor === name));
  clipName = singleBossReview ? reviewClip : capturedArmsReview&&name==='boss'?'slam':'idle'; buildClipList(); selectClip(clipName);
  document.querySelector('.animation-library').scrollTop = 0;
@@ -395,7 +395,7 @@ $('next-frame').addEventListener('click', () => hold(time + 1/60));
 $('timeline').addEventListener('input', event => hold(Number(event.target.value)));
 $('timeline').addEventListener('pointerdown', () => setPlaying(false));
 $('speed').addEventListener('change', event => { speedSelection=event.target.value;updatePlaybackSpeed();syncReference(true); });
-$('cloth').addEventListener('change', event => { if (actor) actor.cloth.visible = event.target.checked; });
+$('cloth').addEventListener('change', event => { if (actor) actor.cloth.visible = event.target.checked && actor.metadata?.cloth!==false; });
 $('travel').addEventListener('change', updateGroundTravel);
 $('opponent').addEventListener('change',()=>{updateOpponent();measureAnimation();fitView();});
 $('opponent-distance').addEventListener('input',()=>{updateOpponent();measureAnimation();fitView();});
@@ -424,14 +424,14 @@ function setupMountEditor(){
  $('mount-edit').addEventListener('change',e=>{const on=e.target.checked;$('mount-tools').hidden=!on;if(on){selectCharacter('player');$('weapons').checked=true;actor.weapon.visible=true;actor.shield.visible=true;mountControls.attach(actors.player.shield);syncMountFromShield();}else mountControls.detach();previewDirty=true;});
  for(const b of document.querySelectorAll('#mount-tools [data-mode]'))b.addEventListener('click',()=>{mountControls.setMode(b.dataset.mode);for(const o of document.querySelectorAll('#mount-tools [data-mode]'))o.setAttribute('aria-pressed',String(o===b));});
  addEventListener('keydown',e=>{if(!$('mount-edit').checked||['TEXTAREA','INPUT'].includes(e.target.tagName))return;const mode={KeyT:'translate',KeyR:'rotate',KeyS:'scale'}[e.code];if(mode){mountControls.setMode(mode);for(const o of document.querySelectorAll('#mount-tools [data-mode]'))o.setAttribute('aria-pressed',String(o.dataset.mode===mode));}});
- $('mount-copy').addEventListener('click',()=>{navigator.clipboard?.writeText($('mount-json').value);$('mount-copy').textContent='Copied';setTimeout(()=>$('mount-copy').textContent='Copy params',1200);});
+ $('mount-copy').addEventListener('click',()=>{navigator.clipboard?.writeText($('mount-json').value);$('mount-copy').textContent='Copiado';setTimeout(()=>$('mount-copy').textContent='Copiar parámetros',1200);});
  $('mount-reset').addEventListener('click',()=>{const a=actors.player,m=shieldMountTransform(a.metadata);a.shield.position.copy(m.position);a.shield.quaternion.copy(m.quaternion);a.shield.scale.setScalar(1);try{localStorage.removeItem('vesper-studio:shieldMount');}catch{}syncMountFromShield();previewDirty=true;});
  restoreSavedMount();$('mount-editor').disabled=false;
 }
 function facingReadout() {
  if (!$('facing').checked || !actor?.gizmo) return;
  const m = actor.gizmo.measure(), fmt = v => Number.isFinite(v) ? `${v > 0 ? '+' : ''}${v.toFixed(0)}°` : '—';
- $('facing-readout').textContent = `Head ${fmt(m.head)} · pelvis ${fmt(m.body)} from the facing line (+ is the model's left)`;
+ $('facing-readout').textContent = `Cabeza ${fmt(m.head)} · pelvis ${fmt(m.body)} desde la línea de orientación (+ es la izquierda del modelo)`;
 }
 document.addEventListener('change', () => { previewDirty = true; });
 $('retry-load').addEventListener('click', () => location.reload());
@@ -456,29 +456,29 @@ try {
  if (singleBossReview) {
   $('speed').querySelector('[value="game"]').hidden=true;
   $('transition-preview').hidden=true;
-  document.title = 'Vesper — Boss idle study';
-  document.querySelector('.studio-heading h1').textContent = 'Boss idle study';
-  document.querySelector('.studio-heading p').textContent = 'Compare the new stance with Previous idle.';
+  document.title = 'Vesper — Estudio de reposo del jefe';
+  document.querySelector('.studio-heading h1').textContent = 'Estudio de reposo del jefe';
+  document.querySelector('.studio-heading p').textContent = 'Compara la nueva postura con Reposo anterior.';
   document.querySelector('[data-actor="player"]').hidden = true;
   document.querySelector('.character-switch').style.gridTemplateColumns = '1fr';
-  document.querySelector('.sidebar-footer').textContent = 'A separate animation study, awaiting your review.';
+  document.querySelector('.sidebar-footer').textContent = 'Un estudio de animación aparte, a la espera de tu revisión.';
  }
  if (videoReview) {
-  document.title = 'Vesper — Video motion review';
-  document.querySelector('.studio-heading h1').textContent = 'Video motion review';
-  document.querySelector('.studio-heading p').textContent = 'Compare the approved video with the boss.';
-  document.querySelector('.sidebar-footer').textContent = 'Compare the supplied motion with the current cleanup. Starts at your preferred 0.25× speed.';
+  document.title = 'Vesper — Revisión de movimiento en vídeo';
+  document.querySelector('.studio-heading h1').textContent = 'Revisión de movimiento en vídeo';
+  document.querySelector('.studio-heading p').textContent = 'Compara el vídeo aprobado con el jefe.';
+  document.querySelector('.sidebar-footer').textContent = 'Compara el movimiento suministrado con la limpieza actual. Empieza a tu velocidad preferida, 0.25×.';
   if (rawComparison) {
-   document.title = 'Vesper — Raw idle takes';
-   document.querySelector('.studio-heading h1').textContent = 'Raw idle takes';
-   document.querySelector('.studio-heading p').textContent = 'Video retry, text generation and the kept IK version.';
-   document.querySelector('.sidebar-footer').textContent = 'The corrected version is preserved. New takes are raw, with floor-height alignment only. Playback starts at 0.25×.';
+   document.title = 'Vesper — Tomas de reposo en bruto';
+   document.querySelector('.studio-heading h1').textContent = 'Tomas de reposo en bruto';
+   document.querySelector('.studio-heading p').textContent = 'Reintento de vídeo, generación por texto y la versión IK conservada.';
+   document.querySelector('.sidebar-footer').textContent = 'La versión corregida se conserva. Las nuevas tomas van en bruto, alineadas solo a la altura del suelo. La reproducción empieza a 0.25×.';
   }
   if (leanReview) {
-   document.title = 'Vesper — Forward lean';
-   document.querySelector('.studio-heading h1').textContent = 'Forward lean';
-   document.querySelector('.studio-heading p').textContent = 'The kept IK idle with a small shift forward.';
-   document.querySelector('.sidebar-footer').textContent = '5° forward from the ankles, with planted boots. Before and after share the same timing. Playback starts at 0.25×.';
+   document.title = 'Vesper — Inclinación al frente';
+   document.querySelector('.studio-heading h1').textContent = 'Inclinación al frente';
+   document.querySelector('.studio-heading p').textContent = 'El reposo IK conservado con un pequeño avance al frente.';
+   document.querySelector('.sidebar-footer').textContent = '5° al frente desde los tobillos, con las botas asentadas. Antes y después comparten la misma temporización. La reproducción empieza a 0.25×.';
   }
   for (const option of $('speed').options) option.selected = Number(option.value) === speed;
   document.querySelector('.studio').classList.add('video-review');
@@ -486,13 +486,13 @@ try {
   const comparison = document.createElement('div'); comparison.className = 'comparison-stage';
   if (leanReview) comparison.classList.add('reference-hidden');
   viewport.before(comparison); comparison.append(viewport);
-  const panel = document.createElement('section'); panel.className = 'source-panel'; panel.setAttribute('aria-label','Approved video reference');
-  const heading = document.createElement('h2'); heading.className = 'source-heading'; heading.textContent = 'Approved video'; panel.append(heading);
-  referenceVideo = document.createElement('video'); referenceVideo.src = VIDEO_URL; referenceVideo.muted = true; referenceVideo.playsInline = true; referenceVideo.preload = 'auto'; referenceVideo.setAttribute('aria-label','Approved boss idle performance');
+  const panel = document.createElement('section'); panel.className = 'source-panel'; panel.setAttribute('aria-label','Referencia de vídeo aprobada');
+  const heading = document.createElement('h2'); heading.className = 'source-heading'; heading.textContent = 'Vídeo aprobado'; panel.append(heading);
+  referenceVideo = document.createElement('video'); referenceVideo.src = VIDEO_URL; referenceVideo.muted = true; referenceVideo.playsInline = true; referenceVideo.preload = 'auto'; referenceVideo.setAttribute('aria-label','Interpretación de reposo del jefe aprobada');
   panel.append(referenceVideo);
   if (rawComparison) { const prompt = document.createElement('blockquote'); prompt.className = 'text-motion-prompt'; prompt.textContent = textPrompt; prompt.hidden = true; panel.append(prompt); }
-  const note = document.createElement('p'); note.className = 'source-note'; note.textContent = 'Play, pause and scrub both views together.'; panel.append(note); comparison.append(panel);
-  const showLabel = document.createElement('label'); const show = document.createElement('input'); show.type = 'checkbox'; show.checked = !leanReview; showLabel.append(show,rawComparison ? ' Source reference' : ' Approved video'); document.querySelector('.display-options').append(showLabel);
+  const note = document.createElement('p'); note.className = 'source-note'; note.textContent = 'Reproduce, pausa y recorre ambas vistas a la vez.'; panel.append(note); comparison.append(panel);
+  const showLabel = document.createElement('label'); const show = document.createElement('input'); show.type = 'checkbox'; show.checked = !leanReview; showLabel.append(show,rawComparison ? ' Referencia de origen' : ' Vídeo aprobado'); document.querySelector('.display-options').append(showLabel);
   show.addEventListener('change',()=>{comparison.classList.toggle('reference-hidden',!show.checked);});
   referenceVideo.addEventListener('loadedmetadata',()=>{if(ready)syncReference(true);});
  }
@@ -523,7 +523,7 @@ try {
  // Review any candidate player bundle without a code change (dev server only):
  // ?character=player&playerRig=assets/x/candidate.glb&playerManifest=docs/x/candidate-manifest.json
  const rigParams=new URLSearchParams(location.search),playerRigOverride=rigParams.get('playerRig'),playerManifestOverride=rigParams.get('playerManifest')?await (await fetch('/'+rigParams.get('playerManifest'))).json():null;
- if(playerRigOverride)document.querySelector('.sidebar-footer').firstChild.textContent='Reviewing candidate '+playerRigOverride+'. Not used in the game.';
+ if(playerRigOverride)document.querySelector('.sidebar-footer').firstChild.textContent='Revisando el candidato '+playerRigOverride+'. No se usa en el juego.';
  actors = await loadActors(scene,{
   ...ASSETS,
   // Archived source/comparison takes retain their original authored scale.
@@ -607,10 +607,10 @@ try {
   syncReference(); timelineUI(); playingUI(); renderer.render(scene,camera);previewDirty=false;
  });
 } catch (error) {
- console.error('Animation studio could not load:',error);
+ console.error('El estudio de animación no pudo cargar:',error);
  try{const failed=new URLSearchParams(location.search);if(failed.get('capture-worker')==='1'&&failed.get('capture-job')!==null)fetch(`${failed.get('capture-server')||'http://127.0.0.1:5199'}/job/${failed.get('capture-job')}/fail`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({error:String(error?.message||error)})});}catch{}
  ready = false; $('loading').classList.add('failed');
- $('load-title').textContent = 'The characters could not load';
- $('load-detail').textContent = 'Check that the local game server is running, then try again.';
+ $('load-title').textContent = 'Los personajes no pudieron cargar';
+ $('load-detail').textContent = 'Comprueba que el servidor local del juego está en marcha y vuelve a intentarlo.';
  $('retry-load').hidden = false;
 }

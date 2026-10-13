@@ -14,8 +14,8 @@ export function transitionTravel(time,speed){
 }
 
 export function transitionPhase(time,isBoss){
- if(time<.6)return 'Idle';
- if(time<4.5)return isBoss?'Walking':'Running';
- if(time<4.95)return 'Settling';
- return 'Idle';
+ if(time<.6)return 'Reposo';
+ if(time<4.5)return isBoss?'Caminando':'Corriendo';
+ if(time<4.95)return 'Asentándose';
+ return 'Reposo';
 }

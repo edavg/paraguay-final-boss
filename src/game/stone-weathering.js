@@ -53,9 +53,9 @@ const F=x=>{const s=String(x);return /[.e]/.test(s)?s:s+'.0';};
 // FLOOR_STYLES name each set's tile size, grid offset and grade; arena.setFloorStyle() swaps the
 // shared uniforms, so no recompile. grade = [gain at black, gain at white, saturation kept].
 export const FLOOR_STYLES={
-  chequer:{label:'Chequered marble',tile:2.4,offset:[0,0],grade:[.62,.80,.85]},
-  basalt:{label:'Black basalt',tile:4.8,offset:[.6,0],grade:[1.05,1.1,.9]},
-  marble:{label:'Dark marble, diagonal',tile:3.0,offset:[0,0],grade:[1.25,1.4,.8]},
+  chequer:{label:'Mármol ajedrezado',tile:2.4,offset:[0,0],grade:[.62,.80,.85]},
+  basalt:{label:'Basalto negro',tile:4.8,offset:[.6,0],grade:[1.05,1.1,.9]},
+  marble:{label:'Mármol oscuro, diagonal',tile:3.0,offset:[0,0],grade:[1.25,1.4,.8]},
 };
 export function floorStyleUniforms(style,map,nr){
   const s=FLOOR_STYLES[style]||FLOOR_STYLES.chequer;

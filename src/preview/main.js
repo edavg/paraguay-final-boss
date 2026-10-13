@@ -48,11 +48,11 @@ const wire = new THREE.MeshBasicMaterial({ color:0xa8c5b7, wireframe:true });
 let current, model, cloth, materialMode = 'original', loadVersion = 0;
 let rigReview;
 const poseDescriptions = {
-  rest:'Rest pose · all eight arms extended.',
-  shoulder:'Shoulder check · the left inner arm folds forward; the other arms stay at rest.',
-  leg:'Leg bend · the left foot lifts forward while the right leg stays at rest.',
-  crouch:'Planted feet · the body lowers while both feet hold their position.',
-  weapon:'Weapon grip · the right main arm raises the blade, with claws closed around its handle.',
+  rest:'Pose de reposo · los ocho brazos extendidos.',
+  shoulder:'Comprobación de hombro · el brazo interno izquierdo se pliega al frente; los demás brazos quedan en reposo.',
+  leg:'Flexión de pierna · el pie izquierdo se adelanta mientras la pierna derecha queda en reposo.',
+  crouch:'Pies asentados · el cuerpo baja mientras ambos pies mantienen su posición.',
+  weapon:'Empuñadura del arma · el brazo principal derecho alza la hoja, con las garras cerradas sobre su mango.',
 };
 let modelSize = new THREE.Vector3(2,4,1), aim = new THREE.Vector3(0,2,0);
 
@@ -86,12 +86,12 @@ async function choose(asset) {
   stage.clear(); model = null; cloth = null; $('#mesh-stats').textContent = '';
   delete viewport.dataset.loaded;
   requestRender();
-  $('#load-status').textContent = asset.modelUrl ? 'Loading the model…' : '3D generation in progress';
+  $('#load-status').textContent = asset.modelUrl ? 'Cargando el modelo…' : 'Generación 3D en curso';
   if (!asset.modelUrl) return;
   try {
     if (!cache.has(asset.key)) cache.set(asset.key, loader.loadAsync(asset.modelUrl));
     const gltf = await cache.get(asset.key);
-    const poseData = asset.isRig ? await fetch(asset.poseUrl).then(r => { if (!r.ok) throw new Error('Could not load rig poses'); return r.json(); }) : null;
+    const poseData = asset.isRig ? await fetch(asset.poseUrl).then(r => { if (!r.ok) throw new Error('No se pudieron cargar las poses del rig'); return r.json(); }) : null;
     if (version !== loadVersion) return;
     model = new THREE.Group(); model.name = asset.key;
     const body = gltf.scene; body.position.set(0,0,0); body.scale.setScalar(1); body.rotation.set(0,asset.frontYaw,0); body.updateMatrixWorld(true);
@@ -113,10 +113,10 @@ async function choose(asset) {
     model.updateMatrixWorld(true);
     const fitted = new THREE.Box3().setFromObject(measure); modelSize = fitted.getSize(new THREE.Vector3()); aim = fitted.getCenter(new THREE.Vector3());
     setMaterial(materialMode); fitView();
-    $('#mesh-stats').textContent = `${Math.round(triangles).toLocaleString()} triangles · ${rigReview ? rigReview.count+' bones · diagnostic poses' : meshes+' mesh'+(meshes===1?'':'es')+' · static GLB'}`;
+    $('#mesh-stats').textContent = `${Math.round(triangles).toLocaleString()} triángulos · ${rigReview ? rigReview.count+' huesos · poses de diagnóstico' : meshes+' malla'+(meshes===1?'':'s')+' · GLB estático'}`;
     $('#load-status').textContent = '';
     viewport.dataset.loaded = asset.key;
-  } catch (error) { console.error(error); $('#load-status').textContent = 'Could not load this model. Reload to retry.'; cache.delete(asset.key); }
+  } catch (error) { console.error(error); $('#load-status').textContent = 'No se pudo cargar este modelo. Recarga para reintentarlo.'; cache.delete(asset.key); }
 }
 for (const asset of assets) {
   const button = document.createElement('button'); button.className = 'asset-button'; button.dataset.key = asset.key;

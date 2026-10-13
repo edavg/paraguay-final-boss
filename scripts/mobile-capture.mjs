@@ -43,7 +43,7 @@ const page=await target(),ws=new WebSocket(page.webSocketDebuggerUrl);await new 
 let nextId=1;const pending=new Map(),errors=[],logs=[];
 ws.onmessage=({data})=>{const msg=JSON.parse(data);if(msg.id&&pending.has(msg.id)){const {resolve,reject}=pending.get(msg.id);pending.delete(msg.id);msg.error?reject(new Error(msg.error.message)):resolve(msg.result);}
  else if(msg.method==='Runtime.exceptionThrown')errors.push(msg.params.exceptionDetails.exception?.description||msg.params.exceptionDetails.text);
- else if(msg.method==='Runtime.consoleAPICalled'){const text=msg.params.args.map(a=>a.value??a.description).join(' ');if(msg.params.type==='error')errors.push(text);else if(msg.params.type==='info'||/Lost Cathedral|local test/i.test(text))logs.push(text);}};
+ else if(msg.method==='Runtime.consoleAPICalled'){const text=msg.params.args.map(a=>a.value??a.description).join(' ');if(msg.params.type==='error')errors.push(text);else if(msg.params.type==='info'||/Catedral Perdida|Lost Cathedral|local test/i.test(text))logs.push(text);}};
 const send=(method,params={})=>new Promise((resolve,reject)=>{const id=nextId++;const timer=setTimeout(()=>{if(pending.has(id)){pending.delete(id);reject(new Error(`CDP ${method} timed out after 60s`));}},60000);pending.set(id,{resolve:v=>{clearTimeout(timer);resolve(v);},reject:e=>{clearTimeout(timer);reject(e);}});ws.send(JSON.stringify({id,method,params}));});
 const evaluate=async expression=>{const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text);return r.result.value;};
 

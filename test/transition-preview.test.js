@@ -13,6 +13,6 @@ test('movement review starts and stops without travel discontinuities',()=>{
   assert.ok(delta>=-1e-8&&delta<=speed/120+1e-7);previous=position;
  }
  for(const boundary of [.6,.88,4.5,4.8])assert.ok(Math.abs(transitionTravel(boundary+1e-6,speed)-transitionTravel(boundary-1e-6,speed))<1e-5);
- assert.equal(transitionPhase(0,false),'Idle');assert.equal(transitionPhase(2,false),'Running');
- assert.equal(transitionPhase(2,true),'Walking');assert.equal(transitionPhase(5.5,false),'Idle');
+ assert.equal(transitionPhase(0,false),'Reposo');assert.equal(transitionPhase(2,false),'Corriendo');
+ assert.equal(transitionPhase(2,true),'Caminando');assert.equal(transitionPhase(5.5,false),'Reposo');
 });

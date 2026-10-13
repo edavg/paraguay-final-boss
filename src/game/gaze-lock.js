@@ -3,7 +3,7 @@ import * as T from 'three';
  * opponent (or the gameplay facing when no target is set). Captured performers look at
  * their own camera or off to the side; the game needs the eyes on the boss. The correction
  * fades out when the head is pitched steeply (rolls), when the target is far behind, and
- * for clips that pass a zero weight (dodge, death). Verify with the cyan facing line. */
+ * for clips that pass a zero weight (dodge, death, and the heal: the bombilla has to stay at her lips). Verify with the cyan facing line. */
 const UP=new T.Vector3(0,1,0),TAU=Math.PI*2;
 function restForward(bone){const inverse=new T.Matrix4().extractRotation(bone.matrixWorld).invert();return new T.Vector3(0,0,1).applyMatrix4(inverse).normalize();}
 const wrap=a=>a-Math.round(a/TAU)*TAU;
@@ -17,7 +17,7 @@ export class GazeLock{
  }
  reset(){this.angle=0;this.applied=null;}
  /** Clip weights that should switch the gaze off. */
- static weight(layers,names=['dodge','death']){let w=1;if(layers)for(const [name,layer] of layers)if(names.includes(name))w-=layer.weight;return T.MathUtils.clamp(w,0,1);}
+ static weight(layers,names=['dodge','death','heal']){let w=1;if(layers)for(const [name,layer] of layers)if(names.includes(name))w-=layer.weight;return T.MathUtils.clamp(w,0,1);}
  /** Current yaw error of the head to the target in degrees before this frame's correction. */
  get error(){return T.MathUtils.radToDeg(this.lastError||0);}
  update(dt,{layers=null,weight=null,raw=false}={}){

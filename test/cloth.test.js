@@ -109,7 +109,9 @@ test('boss cloth: a shoulder cloak on the spine, not the player strips repainted
     `cloak socket at ${mantle.position.toArray()}`);
 });
 
-for (const kind of ['player', 'boss']) test(`${kind} cloth: stays attached, unstretched and outside the body through idle, locomotion and an action`, async () => {
+// A player manifest with "cloth": false hides the knight's garments, so there is nothing to simulate on that body.
+const clothHidden = kind => kind === 'player' && ASSETS.motion.player.cloth === false && 'the current player body hides the knight garments';
+for (const kind of ['player', 'boss']) test(`${kind} cloth: stays attached, unstretched and outside the body through idle, locomotion and an action`, {skip: clothHidden(kind)}, async () => {
   const actor = await rigged(kind);
   const clips = kind === 'boss' ? ['idle', 'walk-forward', 'sweep'] : ['idle', 'run-forward', 'dodge'];
   for (const clip of clips) {

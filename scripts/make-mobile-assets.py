@@ -18,7 +18,11 @@ OUT = os.path.join(ROOT, 'assets', 'mobile')
 # The heavy models: every one of these carries three 4096-square maps (see docs/mobile-2026-09-17/README.md).
 GLBS = {
     'player-video-candidate-v18.glb': 'assets/player-motion-revision-3/player-video-candidate-v18.glb',
+    'player-paraguay-rig-v1.glb': 'assets/player-paraguay/player-paraguay-rig-v1.glb',
+    'player-paraguay-rig-v2.glb': 'assets/player-paraguay/player-paraguay-rig-v2.glb',
+    'player-paraguay-rig-v3.glb': 'assets/player-paraguay/player-paraguay-rig-v3.glb',
     'boss-supported-combat.glb': 'assets/production/boss-supported-combat.glb',
+    'boss-man-rig-v1.glb': 'assets/boss-man/boss-man-rig-v1.glb',
     'scythe-fitted.glb': 'assets/idle-video-motion/scythe-fitted.glb',
     'player-sword.glb': 'assets/create-the-exact-isolated-player-sword-s-cmu12ngf.glb',
     'player-shield.glb': 'assets/create-the-exact-isolated-player-shield-cmu12nf3.glb',
@@ -101,14 +105,19 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--max', type=int, default=1024, help='long side cap in px (default 1024)')
     parser.add_argument('--quality', type=int, default=88, help='JPEG quality for resized maps (default 88)')
+    parser.add_argument('--only', action='append', help='build just this output name (repeatable); default: all')
     args = parser.parse_args()
     os.makedirs(OUT, exist_ok=True)
     for name, rel in GLBS.items():
+        if args.only and name not in args.only:
+            continue
         src, dst = os.path.join(ROOT, rel), os.path.join(OUT, name)
         report = convert_glb(src, dst, args.max, args.quality)
         maps = ', '.join(f'{b[0]}x{b[1]}->{a[0]}x{a[1]}' for _, b, a, _, _ in report)
         print(f'{name}: {os.path.getsize(src)/1048576:.1f} MB -> {os.path.getsize(dst)/1048576:.1f} MB  [{maps}]')
     for name, rel in IMAGES.items():
+        if args.only and name not in args.only:
+            continue
         src, dst = os.path.join(ROOT, rel), os.path.join(OUT, name)
         with open(src, 'rb') as f:
             raw = f.read()

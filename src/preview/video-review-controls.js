@@ -5,8 +5,8 @@ const time=document.getElementById('time');
 video.src=VIDEO_URL;
 document.getElementById('download').href=VIDEO_URL;
 const sync=()=>{
- toggle.textContent=video.paused?'Play':'Pause';
- time.textContent=Number.isFinite(video.duration)?`${video.currentTime.toFixed(2)} / ${video.duration.toFixed(2)} s`:'Loading…';
+ toggle.textContent=video.paused?'Reproducir':'Pausa';
+ time.textContent=Number.isFinite(video.duration)?`${video.currentTime.toFixed(2)} / ${video.duration.toFixed(2)} s`:'Cargando…';
 };
 const play=()=>video.play().catch(sync);
 const step=direction=>{video.pause();video.currentTime=Math.max(0,Math.min(video.duration||0,video.currentTime+direction/VIDEO_FPS));sync();};
@@ -16,7 +16,7 @@ document.getElementById('back').addEventListener('click',()=>step(-1));
 document.getElementById('next').addEventListener('click',()=>step(1));
 document.getElementById('speed').addEventListener('change',event=>{video.playbackRate=Number(event.target.value);});
 for(const event of ['loadedmetadata','timeupdate','play','pause','seeked','ended'])video.addEventListener(event,sync);
-video.addEventListener('error',()=>{time.textContent='Video could not load. Try refreshing this page.';});
+video.addEventListener('error',()=>{time.textContent='El vídeo no pudo cargar. Prueba a recargar esta página.';});
 document.addEventListener('keydown',event=>{
  if(event.target.matches('input,select,button,a')||event.repeat)return;
  if(event.code==='Space'){event.preventDefault();video.paused?play():video.pause();}

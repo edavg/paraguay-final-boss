@@ -1,7 +1,13 @@
-// Player bundle V18 = V17 + light2 (the light combo's second hit). One-line fallback to V17: swap v18 -> v17 here and in playerRig below.
-import playerMotion from '../../docs/player-motion-revision-3/player-video-candidate-v18-manifest.json' with {type:'json'};
-// Round 3 (16 Sep evening): the fissure, faster/rarer sweep and slam. One-line fallback: boss-round2-manifest.json.
-import bossMotion from '../../docs/boss-round3-manifest.json' with {type:'json'};
+// Player bundle: the Paraguayan player (12 Oct 2026), V18's clips retargeted onto her Tripo rig by
+// scripts/retarget-player-paraguay.py; v2 adds the skirt panel bones and trim anchors (scripts/dress-player-paraguay.py);
+// v3 replaces the heal with the tereré sip (scripts/author-terere-heal.py). Fallback to the Thorn Exile knight: swap both this import and playerRig
+// below (desktop and MOBILE_ASSETS) back to player-motion-revision-3/player-video-candidate-v18.
+// V18 = V17 + light2 (the light combo's second hit); V17 fallback: swap v18 -> v17.
+import playerMotion from '../../docs/player-paraguay/player-paraguay-rig-v3-manifest.json' with {type:'json'};
+// Boss bundle: the man from the user's photos (12 Oct 2026), the Round 3 Armored Death clips retargeted onto his
+// mesh-fitted rig (scripts/rig-boss-man.py + scripts/retarget-player-paraguay.py). Fallback to Armored Death: swap this
+// import back to boss-round3-manifest.json and bossRig below (desktop and MOBILE_ASSETS) to boss-supported-combat.glb.
+import bossMotion from '../../docs/boss-man/boss-man-rig-v1-manifest.json' with {type:'json'};
 import {withActorScale} from './actor-scale.js';
 // Round 2 (stream FX): the user's chosen combat sounds. Each key in the JSON is a
 // list of local takes under assets/sfx/; the game picks one per play and never
@@ -13,8 +19,8 @@ const SFX_URLS=import.meta.env?import.meta.glob('../../assets/sfx/**/*.mp3',{eag
 const sfxUrl=relative=>SFX_URLS['../../'+relative]??new URL('../../'+relative,import.meta.url).href;
 const chosenSounds=(key,fallback)=>{const takes=(Array.isArray(soundsChosen[key])?soundsChosen[key]:[soundsChosen[key]]).filter(take=>typeof take==='string'&&take.endsWith('.mp3')).map(sfxUrl);return takes.length?takes:fallback;};
 export const ASSETS={
- playerRig:new URL('../../assets/player-motion-revision-3/player-video-candidate-v18.glb',import.meta.url).href, // V17 fallback: player-video-candidate-v17.glb + the v17 manifest import above
- bossRig:new URL('../../assets/production/boss-supported-combat.glb',import.meta.url).href,
+ playerRig:new URL('../../assets/player-paraguay/player-paraguay-rig-v3.glb',import.meta.url).href, // knight fallback: player-motion-revision-3/player-video-candidate-v18.glb + its manifest import above
+ bossRig:new URL('../../assets/boss-man/boss-man-rig-v1.glb',import.meta.url).href, // Armored Death fallback: production/boss-supported-combat.glb
  scythe:new URL('../../assets/idle-video-motion/scythe-fitted.glb',import.meta.url).href,
  scytheHeight:2.85,
  motion:{player:playerMotion,boss:withActorScale(bossMotion,1.3)},
@@ -83,8 +89,8 @@ export const ASSETS={
 // scripts/make-mobile-assets.py (mesh, rig, clips and materials byte-for-byte the same), and the seal at 1024.
 // main.js swaps these in on the touch path only; the desktop never reads this table.
 export const MOBILE_ASSETS={
- playerRig:new URL('../../assets/mobile/player-video-candidate-v18.glb',import.meta.url).href,
- bossRig:new URL('../../assets/mobile/boss-supported-combat.glb',import.meta.url).href,
+ playerRig:new URL('../../assets/mobile/player-paraguay-rig-v3.glb',import.meta.url).href, // knight fallback: mobile/player-video-candidate-v18.glb
+ bossRig:new URL('../../assets/mobile/boss-man-rig-v1.glb',import.meta.url).href, // Armored Death fallback: mobile/boss-supported-combat.glb
  scythe:new URL('../../assets/mobile/scythe-fitted.glb',import.meta.url).href,
  playerSword:new URL('../../assets/mobile/player-sword.glb',import.meta.url).href,
  playerShield:new URL('../../assets/mobile/player-shield.glb',import.meta.url).href,

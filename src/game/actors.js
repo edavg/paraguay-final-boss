@@ -1,6 +1,9 @@
 import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {createPlayerCloth,updatePlayerCloth,bindCloth} from './player-cloth.js';
+import {SkirtSway} from './skirt-sway.js';
+import {createPlayerTrim} from './player-trim.js';
+import {createGuampa,createShieldSling} from './guampa.js';
 import {createBossCloth} from './boss-cloth.js';
 import {capObjectTextures} from './texture-budget.js';
 import {bossWeaponPose,playerWeaponPose, actionDuration, createActionTimings} from './weapon-motion.js';
@@ -72,16 +75,21 @@ export async function loadActors(scene,paths,{textureCap=0,serial=false}={}){
  boss.weaponSegment=weaponSegmentFor(true,paths);
  // Cloth is detachable: each garment declares which bone carries it, and the
  // offset is captured in the bind pose so the sewn rows stay on the armour.
- player.cloth=createPlayerCloth(1.85);player.root.add(player.cloth);
- boss.cloth=createBossCloth(2.5);boss.root.add(boss.cloth);
+ // The knight's garments are measured for his armour; a manifest with "cloth": false (the Paraguayan player) hides them.
+ player.cloth=createPlayerCloth(1.85);player.cloth.visible=paths.motion?.player?.cloth!==false;player.root.add(player.cloth);
+ player.trim=createPlayerTrim(player.body,paths.motion?.player?.trim,player.skirt);if(player.trim)player.root.add(player.trim.object);
+ player.guampa=createGuampa(player.body,paths.motion?.player?.clips?.heal?.guampa);
+ // The guampa takes the shield hand, so the shield is slung at her side while she drinks.
+ player.shieldSling=player.guampa?createShieldSling(player):null;
+ boss.cloth=createBossCloth(2.5);boss.cloth.visible=paths.motion?.boss?.cloth!==false;boss.root.add(boss.cloth); // the man in the suit wears no cloak
  for(const a of [player,boss]){
   a.root.updateMatrixWorld(true);
   a.clothBindings=bindCloth(a.cloth,a.body);
  }
  return{player,boss};
 }
-export function createActor(gltf,height,isBoss,rigged,metadata={}){const root=new T.Group(),visualRoot=new T.Group();root.add(visualRoot);const dimensions=actorDimensions(isBoss,metadata);root.scale.setScalar(dimensions.scale);if(rigged){visualRoot.add(gltf.scene);gltf.scene.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;n.frustumCulled=false;}});}else visualRoot.add(prepare(gltf.scene,height,-Math.PI/2));root.name=isBoss?'Armored Death':'Thorn Exile';applyClipAdjustments(gltf.animations,metadata);const animation=new ActorAnimation(gltf.scene,gltf.animations,metadata),mixer=animation.mixer,clips=animation.actions;const timings=createActionTimings(metadata,isBoss),footContacts=new FootContacts(),soleClearance=new SoleClearance(gltf.scene,{maxLift:.06*dimensions.scale}),footPlant=!isBoss&&rigged?new FootPlant(gltf.scene,soleClearance):null,locomotionFootBlend=!isBoss&&rigged?new LocomotionFootBlend(gltf.scene,soleClearance,gltf.animations):null;const headEffect=isBoss&&rigged?createHeadEffect(gltf.scene.getObjectByName('mixamorigHead')):null,gazeLock=!isBoss&&rigged?new GazeLock(gltf.scene,root):null;const footBones=Object.fromEntries(['Left','Right'].map(side=>[side,gltf.scene.getObjectByName('mixamorig'+side+'Foot')]).filter(([,bone])=>bone));return{headEffect,gazeLock,dimensions,worldScale:dimensions.scale,authoredHeight:height,locomotionFootBlend,footPlant,soleClearance,footContacts,footBones,footsteps:[],root,visualRoot,body:gltf.scene,animation,mixer,clips,metadata,timings,height:height*dimensions.scale,isBoss,lastPosition:new T.Vector3(),speed:0,deathTime:0,weapon:null,segment:null,previousSegment:null,reset(motion){
- this.shieldDrop?.reset();this.animation.reset();this.headEffect?.reset();this.gazeLock?.reset();this.footContacts.reset();this.footsteps=[];this.current=null;this.lastAction=null;this.deathTime=0;this.speed=0;this.moving=false;this.moveDirection='forward';
+export function createActor(gltf,height,isBoss,rigged,metadata={}){const root=new T.Group(),visualRoot=new T.Group();root.add(visualRoot);const dimensions=actorDimensions(isBoss,metadata);root.scale.setScalar(dimensions.scale);if(rigged){visualRoot.add(gltf.scene);gltf.scene.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;n.frustumCulled=false;}});}else visualRoot.add(prepare(gltf.scene,height,-Math.PI/2));root.name=isBoss?'Muerte Acorazada':'Exiliado de Espinas';applyClipAdjustments(gltf.animations,metadata);const animation=new ActorAnimation(gltf.scene,gltf.animations,metadata),mixer=animation.mixer,clips=animation.actions;const timings=createActionTimings(metadata,isBoss),footContacts=new FootContacts(),soleClearance=new SoleClearance(gltf.scene,{maxLift:.06*dimensions.scale}),footPlant=!isBoss&&rigged?new FootPlant(gltf.scene,soleClearance):null,locomotionFootBlend=!isBoss&&rigged?new LocomotionFootBlend(gltf.scene,soleClearance,gltf.animations):null,skirt=!isBoss&&rigged?SkirtSway.from(gltf.scene):null;const headEffect=isBoss&&rigged?createHeadEffect(gltf.scene.getObjectByName('mixamorigHead')):null,gazeLock=!isBoss&&rigged?new GazeLock(gltf.scene,root):null;const footBones=Object.fromEntries(['Left','Right'].map(side=>[side,gltf.scene.getObjectByName('mixamorig'+side+'Foot')]).filter(([,bone])=>bone));return{skirt,trim:null,guampa:null,headEffect,gazeLock,dimensions,worldScale:dimensions.scale,authoredHeight:height,locomotionFootBlend,footPlant,soleClearance,footContacts,footBones,footsteps:[],root,visualRoot,body:gltf.scene,animation,mixer,clips,metadata,timings,height:height*dimensions.scale,isBoss,lastPosition:new T.Vector3(),speed:0,deathTime:0,weapon:null,segment:null,previousSegment:null,reset(motion){
+ this.shieldDrop?.reset();this.skirt?.reset();this.trim?.reset();this.animation.reset();this.headEffect?.reset();this.gazeLock?.reset();this.footContacts.reset();this.footsteps=[];this.current=null;this.lastAction=null;this.deathTime=0;this.speed=0;this.moving=false;this.moveDirection='forward';
  this.root.position.set(motion.x,0,motion.z);this.root.rotation.y=motion.yaw;this.lastPosition.copy(this.root.position);this.previousPosition=this.root.position.clone();
  this.previousSegment=null;this.segment=null;
  },update(dt,time,state,motion){
@@ -123,6 +131,8 @@ export function createActor(gltf,height,isBoss,rigged,metadata={}){const root=ne
   const soleLift=this.soleClearance.lift();
   if(soleLift>0){this.visualRoot.position.y=soleLift/this.worldScale;this.visualRoot.updateMatrixWorld(true);}
  }else if(this.footPlant)this.footPlant.maxCorrection=0;
+ // The skirt panels and the shawl/sash trim are code cloth on top of the final pose (src/game/skirt-sway.js, player-trim.js).
+ this.skirt?.update(dt);this.trim?.update(dt,this.root);this.guampa?.update(action);
  const solePoints=this.soleClearance.contactPoints(),actualSoles=Object.keys(solePoints).length>0;
  const feet=actualSoles?solePoints:Object.fromEntries(Object.entries(this.footBones).map(([side,bone])=>[side,bone.getWorldPosition(new T.Vector3())]));
  this.footsteps=this.footContacts.update(dt,feet,{moving:this.moving,boss:this.isBoss,settled:!this.animation.transition,action,groundHeight:actualSoles?0:undefined,scale:this.worldScale});
@@ -135,7 +145,7 @@ export function createActor(gltf,height,isBoss,rigged,metadata={}){const root=ne
  if(this.shield&&this.shield.parent===this.root){this.shield.position.set(.43,state.blocking?1.13:.8,state.blocking?.47:.08);this.shield.rotation.y=state.blocking?0:Math.PI/2;}
  // The roll tuck straps the shield to the left forearm instead of following the whipping
  // hand socket; src/game/shield-strap.js keeps it off the floor and blends it back.
- else if(this.shield&&!this.shieldDrop?.dropped){if(this.shieldStrap===undefined)this.shieldStrap=createShieldStrap(this);this.shieldStrap?.update(dt,shieldTuckWeight(action,actionDuration(this.timings.dodge)));}
+ else if(this.shield&&!this.shieldDrop?.dropped){if(this.shieldStrap===undefined)this.shieldStrap=createShieldStrap(this);this.shieldStrap?.update(dt,shieldTuckWeight(action,actionDuration(this.timings.dodge)));if(this.shieldSling&&!this.shieldDrop?.dropped)this.shieldSling.update(action,actionDuration(this.timings.heal));}
  if(this.cloth){
   // Two temporaries kept on the actor: this used to clone a Matrix4 for the
   // inverse and clone it again per garment, 9 allocations every frame.

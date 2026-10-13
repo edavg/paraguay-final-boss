@@ -200,7 +200,8 @@ test('attack input: a short press is a light at release, a held press is a heavy
 
 test('the game bundle is V18 with light2 and a chain point inside the light recovery', () => {
   const rig = fileURLToPath(ASSETS.playerRig), manifest = ASSETS.motion.player;
-  assert.ok(rig.endsWith('player-video-candidate-v18.glb'));
+  // V18 itself, or a body whose clips were retargeted from V18 (the Paraguayan player).
+  assert.ok(rig.endsWith('player-video-candidate-v18.glb') || manifest.retarget?.source.endsWith('player-video-candidate-v18.glb'));
   assert.ok(rig.endsWith(manifest.asset.replace(/^assets\//, '')));
   assert.equal(createHash('sha256').update(readFileSync(rig)).digest('hex'), manifest.sha256);
   const light = manifest.clips.light, light2 = manifest.clips.light2;

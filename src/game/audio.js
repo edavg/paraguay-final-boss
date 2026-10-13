@@ -116,7 +116,7 @@ export class GameAudio{
  setTrack(url,{preview=false}={}){if(!url)return;const next=new URL(url,location.href).href;if(this.music.src===next)return;const playing=!this.music.paused;this.music.src=next;this.music.load();if(playing||(preview&&this.enabled))this.music.play().catch(()=>{});}
  setMusic(value){this.musicLevel=clamp(value,0,1)*.375;/* 25 % under round 2 (user, 16 Sep) */if(this.musicGain){this.musicGain.gain.value=this.musicLevel;this.music.volume=1;}else this.music.volume=this.musicLevel;}
  setSfx(value){this.volume=clamp(value,0,1);this.master?.gain.setTargetAtTime(this.volume,this.context.currentTime,.015);}
- status(){return`${this.context?.state==='running'?'Spatial audio':this.suspended?'Audio paused':'Audio ready'} · ${this.buffers.size}/${SOUNDS.length} sounds · ${this.pool.size} voices`;}
+ status(){return`${this.context?.state==='running'?'Audio espacial':this.suspended?'Audio en pausa':'Audio listo'} · ${this.buffers.size}/${SOUNDS.length} sonidos · ${this.pool.size} voces`;}
  play(name,gain=1,position){
   if(!this.enabled||this.suspended)return;
   const take=pickTake(this.paths[name],this.lastTake.get(name)??-1);
