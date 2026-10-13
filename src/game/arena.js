@@ -1092,7 +1092,7 @@ export async function buildArena(scene,texturePaths={}){
    }`});
  // Gothic tattered banners, valance swags and wall cloth: one mesh, one
  // material, real vertex-shader wind and a matching displaced shadow.
- const banners=await createBanners(ASSETS.bannerAtlas,{reliefPath:ASSETS.bannerDamask,swagPath:ASSETS.valanceSwag});
+ const banners=await createBanners(ASSETS.bannerAtlas,{reliefPath:ASSETS.bannerDamask,swagPath:ASSETS.valanceSwag,flagPath:ASSETS.bannerAnr});
  if(banners)root.add(banners.mesh);
  // Localised stains: one merged mesh, one material, the 2x2 atlas on disk.
  if(stainTexture){

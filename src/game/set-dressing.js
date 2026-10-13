@@ -240,17 +240,6 @@ export function bannerRod(ctx,side,z,y,width){
 
 export function bannerRods(ctx){
  for(const z of [-12,-6,0,6,12])for(const side of [-1,1])bannerRod(ctx,side,z,8.72,2.4);
- for(const z of [-10.5,-4.5,1.5,7.5,13.5])for(const side of [-1,1])bannerRod(ctx,side,z,7.42,.95);
- // Rods for the two west-wall banners, mounted flat on the wall.
- for(const x of [-5.85,5.85]){
-  const {dark:iron,brass:bronze}=ctx.mats;
-  ctx.put(new T.CylinderGeometry(.032,.032,2.84,7),iron,[x,10.52,19.22],[0,0,Math.PI/2]);
-  for(const dx of [-1.42,1.42]){
-   ctx.put(new T.SphereGeometry(.055,7,5),iron,[x+dx,10.52,19.22]);
-   ctx.tube([v(x+dx*.82,10.74,19.42),v(x+dx*.9,10.62,19.34),v(x+dx,10.52,19.22)],.017,iron);
-  }
-  for(let k=-1;k<=1;k++)ctx.put(new T.TorusGeometry(.055,.011,4,12),bronze,[x+k*.85,10.52,19.22],[0,0,0]);
- }
  // The rod the chancel swag row hangs from, spanning the z = -15 piers.
  const {dark}=ctx.mats;
  ctx.put(new T.CylinderGeometry(.055,.055,17.6,8),dark,[0,9.78,-16.1],[0,0,Math.PI/2]);

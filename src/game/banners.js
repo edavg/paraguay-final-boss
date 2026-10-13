@@ -89,10 +89,10 @@ export function tatteredWallCloth(side,z,baseX,width,height,y,seed){
 
 // A hanging cloth in the YZ plane: width runs along the nave, the normal points
 // into the nave, and the wind pushes it off the wall.
-function hangingCloth(side,z,y,width,height,segments,phase,amplitude,column,zoom=1,variation={}){
+function hangingCloth(side,z,y,width,height,segments,phase,amplitude,column,zoom=1,variation={},columns=COLUMNS){
  const g=new T.PlaneGeometry(width,height,segments[0],segments[1]);
  g.rotateY(side<0?Math.PI/2:-Math.PI/2);
- tag(g,phase,amplitude,height,column,0,COLUMNS,zoom,variation);
+ tag(g,phase,amplitude,height,column,0,columns,zoom,variation);
  g.translate(side*11.15,y,z);
  return g;
 }
@@ -240,22 +240,23 @@ function clothMesh(parts,material,uniforms,key){
  return mesh;
 }
 
-export async function createBanners(atlasPath,{reliefPath,swagPath}={}){
+export async function createBanners(atlasPath,{reliefPath,swagPath,flagPath}={}){
  const loader=new T.TextureLoader();
- const [texture,relief,swag]=await Promise.all([
+ const [texture,relief,swag,flag]=await Promise.all([
   loader.loadAsync(atlasPath).catch(()=>null),
   reliefPath?loader.loadAsync(reliefPath).catch(()=>null):Promise.resolve(null),
   swagPath?loader.loadAsync(swagPath).catch(()=>null):Promise.resolve(null),
+  flagPath?loader.loadAsync(flagPath).catch(()=>null):Promise.resolve(null),
  ]);
  if(!texture)return null;
- for(const t of [texture,swag]){if(!t)continue;t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.ClampToEdgeWrapping;t.anisotropy=8;}
+ for(const t of [texture,swag,flag]){if(!t)continue;t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.ClampToEdgeWrapping;t.anisotropy=8;}
  // The relief is a tiling damask: it gets its own wrap and its own metre scale,
  // so one map serves all three atlas columns and both cloth meshes.
  if(relief){relief.wrapS=relief.wrapT=T.RepeatWrapping;relief.repeat.set(9,7);relief.anisotropy=4;}
 
  const group=new T.Group();group.name='Cathedral cloth';
  const uniforms={uTime:{value:0}};
- const parts=[];
+ const parts=[],flags=[];
  let phase=0;
  // Free-hanging nave banners, outside the pier line and well outside the
  // fighting floor, so they never need a collider of any kind. Wider and longer
@@ -276,79 +277,22 @@ export async function createBanners(atlasPath,{reliefPath,swagPath}={}){
  BANNER_Z.forEach((z,index)=>{
   for(const side of [-1,1]){
    const slot=index*2+(side>0?1:0);
-   parts.push(hangingCloth(side,z,5.35+((slot*3)%4)*.11,2.4-((slot*2)%3)*.14,6.5-((slot*7)%5)*.26,[9,28],
-    phase+=1.37,.28,NAVE_COLUMN[slot],1,{mirror:NAVE_MIRROR[slot]}));
-  }
- });
- // A second, narrower rank between the bays keeps the wall from reading as a
- // regular grid of five identical flags.
- [-10.5,-4.5,1.5,7.5,13.5].forEach((z,index)=>{
-  // zoom 1.9: at 1:1 the damask motif tiled four times across a 0.95 m ribbon
-  // and read as printed pattern rather than woven cloth. Column 2 is a seamless
-  // tile with no alpha cut, so it takes zoom, shift and mirror safely.
-  for(const side of [-1,1]){
-   const slot=index*2+(side>0?1:0);
-   parts.push(hangingCloth(side,z+((slot*3)%4-1.5)*.12,5.2+((slot*5)%3-1)*.1,.95,4.3-((slot*3)%4)*.18,[5,20],
-    phase+=1.37,.26,2,1.75+((slot*7)%4)*.13,{shiftU:((slot*11)%5-2)*.04,shiftV:((slot*13)%5-2)*.055,mirror:(slot%3)===1}));
-  }
- });
- // Round 2 (ENV): crimson drops on the nave faces of the piers, where the DS3
- // reference hangs its red cloth. Narrow and high (rod at 7.3 m, hem above
- // 3.5 m), 0.5 m in front of the shaft at |x| = 9.6: outside the fighting
- // floor and above anything the camera can reach. Column 2 (the seamless
- // damask), zoomed and shifted per pier so no two are the same window.
- [-15,-9,-3,3,9].forEach((z,index)=>{
-  for(const side of [-1,1]){
-   const slot=index*2+(side>0?1:0),drop=3.8-((slot*5)%4)*.22;
-   const g=new T.PlaneGeometry(.92-((slot*3)%3)*.06,drop,4,15);
-   g.rotateY(side<0?Math.PI/2:-Math.PI/2);
-   tag(g,phase+=1.37,.22,drop,2,0,COLUMNS,2.1+((slot*7)%4)*.15,{shiftU:((slot*11)%5-2)*.04,shiftV:((slot*13)%5-2)*.05,mirror:(slot%2)===0});
-   g.translate(side*9.6,7.3+((slot*5)%4)*.11-drop/2,z+((slot*3)%3-1)*.08);
-   parts.push(g);
+   const y=5.35+((slot*3)%4)*.11,width=2.4-((slot*2)%3)*.14,drop=6.5-((slot*7)%5)*.26;
+   // The ANR banner (its own texture, never mirrored: the lettering would
+   // read backwards) when it loaded, else the original atlas banner.
+   if(flag)flags.push(hangingCloth(side,z,y,width,drop,[9,28],phase+=1.37,.28,0,1,{},1));
+   else parts.push(hangingCloth(side,z,y,width,drop,[9,28],phase+=1.37,.28,NAVE_COLUMN[slot],1,{mirror:NAVE_MIRROR[slot]}));
   }
  });
  for(const side of [-1,1])parts.push(valanceStrip(side,phase+=1.37));
- // Two full-height banners flanking the sealed west door, hanging FLAT on the
- // west wall - the first cloth in the game whose wind runs along Z, which is
- // what the aBanner axis component was widened for.
- for(const x of [-5.85,5.85]){
-  const g=new T.PlaneGeometry(2.5,7.2,9,30);
-  g.rotateY(Math.PI);
-  // Columns 0 and 2 (black-and-gold skull, crimson damask). Column 1 is the
-  // bone banner and at this height it was the brightest object in the frame.
-  tag(g,phase+=1.37,.24,7.2,x<0?0:2,1);
-  g.translate(x,6.85,19.3);
-  parts.push(g);
- }
- // Wall cloths hung in the aisle bays. These were ten flat PlaneGeometry
- // rectangles at amplitude .06 carrying the tiling damask at 1:1 - hard-edged
- // panels with a dead-straight hem and a repeating diamond print, i.e. red and
- // gold Victorian wallpaper glued between the piers, and the largest wall
- // objects in every side view (round 1 review, A-review1/edge/edgeL.jpg).
- // Now each one is a real hanging cloth: torn hem with two climbing rips, a
- // two-harmonic fold profile off the ashlar, the damask sampled at 2.2x so the
- // motif is cloth-scale, and three times the wind so it visibly breathes.
- // Round 2 review: the ten cloths were all the same motif at the same scale with
- // the same drop, so the wall read as a wallpaper repeat, and the wind measured
- // 1.06-1.40 mean levels per second against a 1.0 static control - i.e. someone
- // glancing at a panel still saw almost nothing move. Per-bay atlas window,
- // zoom, mirror, width, drop and rod height fix the repeat; amplitude .185 ->
- // .34 with a hem flutter harmonic (see bannerWind) fixes the motion.
- let seed=0;
- [-13.2,-7.2,-1.2,4.8,10.8].forEach((z,index)=>{
-  for(const side of [-1,1]){
-   const slot=index*2+(side>0?1:0);
-   const drop=6.1-((slot*7)%4)*.28;
-   const g=tatteredWallCloth(side,z+((slot*5)%3-1)*.14,12.55,2.45-((slot*3)%4)*.11,drop,7.42+((slot%5)-2)*.13,++seed*1.91);
-   tag(g,phase+=1.37,.34,drop,2,0,COLUMNS,2.0+((slot*11)%4)*.17,
-    {shiftU:((slot*7)%5-2)*.045,shiftV:((slot*3)%5-2)*.05,mirror:(slot%2)===1});
-   parts.push(g);
-  }
- });
  // .72 because the banners were the brightest saturated objects in every aisle
  // shot - brighter than the candle flames they were supposed to hang beside.
  const mesh=clothMesh(parts,clothMaterial(texture,relief,{sheenColor:0x6e2622,color:0xd8d4d0,glow:.10}),uniforms,'vesper-banner-wind-v3');
  if(mesh){mesh.name='Cathedral banners';group.add(mesh);}
+ if(flags.length){
+  const flagMesh=clothMesh(flags,clothMaterial(flag,relief,{sheenColor:0x6e2622,color:0xd8d4d0,glow:.10}),uniforms,'vesper-banner-wind-anr');
+  if(flagMesh){flagMesh.name='ANR nave banners';group.add(flagMesh);}
+ }
  // glow .40 -> .13 (round 1 review): at .40 the oxblood velvet directly above
  // the boss was the brightest saturated shape in the lock-on frame - brighter
  // than the votive bank behind him - and read as a theatre pelmet. The crimson

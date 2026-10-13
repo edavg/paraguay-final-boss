@@ -45,6 +45,8 @@ export const ASSETS={
  cathedralMetal:new URL('../../assets/webp/seamless-tiling-tarnished-brass-and-wrou-cmu38f45.webp',import.meta.url).href,
  lancetGlass:new URL('../../assets/webp/environment/lancet-glass.webp',import.meta.url).href,
  bannerAtlas:new URL('../../assets/webp/environment/banner-atlas.webp',import.meta.url).href,
+ // The ANR flag as a torn nave banner (scripts/make-anr-banner.py).
+ bannerAnr:new URL('../../assets/webp/environment/banner-anr.webp',import.meta.url).href,
  wallGrunge:new URL('../../assets/webp/environment/wall-grunge.webp',import.meta.url).href,
  windowCookie:new URL('../../assets/webp/greyscale-light-cookie-gobo-mask-three-t-cmu38gk1.webp',import.meta.url).href,
  // Cloth relief and the chancel swag row (stream A, second session). Both were
