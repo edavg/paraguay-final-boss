@@ -118,6 +118,8 @@ function step(dt){audio.setListener(motion.player,yaw);if(bufferedAction){if(buf
  }
  const p=motion.player,b=motion.boss;const ph=actorCapsule(p,dimensions.player),bh=actorCapsule(b,dimensions.boss);const geo=motion.geometry();geo.playerHit=sweptWeaponContact(actors.player.previousSegment,actors.player.segment,bh,dimensions.boss.hurtRadius);geo.bossHit=sweptWeaponContact(actors.boss.previousSegment,actors.boss.segment,ph,dimensions.player.hurtRadius);fight.step(dt,geo);handleEvents();const kick=combat?.sample(dt);if(kick){if(kick.shake)addTrauma(kick.shake);hitStop=Math.max(hitStop,kick.hitStop);if(kick.fov)fovKick=kick.fov;}
  const ba=fight.boss.action;if(ba){const si=strikeIndex(ba.name,ba.elapsed,true,fight.timings.boss);if(si>=0&&ba.audioStrike!==si){ba.audioStrike=si;audio.play('bossSwing',1,motion.boss);}}const pa=fight.player.action;if(pa){const si=strikeIndex(pa.name,pa.elapsed,false,fight.timings.player);if(si>=0&&!pa.audio){pa.audio=true;audio.play('playerSwing',1,motion.player);}}
+ // Tereré heal: the bombilla slurp starts on the first sip and runs through the three.
+ const sipAt=ASSETS.motion.player?.clips?.heal?.sips?.[0];if(pa?.name==='heal'&&sipAt!=null&&!pa.sipAudio&&pa.elapsed>=sipAt-.05){pa.sipAudio=true;audio.play('terereSip',1,motion.player);}
  }
 function cameraStep(dt){const p=motion.player,b=motion.boss;let target=new T.Vector3(p.x,1.35,p.z);if(fight.status==='ready'){const t=elapsed*.045;camera.position.set(3.4+Math.sin(t)*.5,2.65,13.6);target.set(-.5,2,-7);camera.lookAt(target);return;}
  if(lock){const desired=Math.atan2(p.x-b.x,p.z-b.z);yaw+=Math.atan2(Math.sin(desired-yaw),Math.cos(desired-yaw))*Math.min(1,dt*5);target.lerp(new T.Vector3(b.x,dimensions.boss.focusHeight,b.z),.18);}

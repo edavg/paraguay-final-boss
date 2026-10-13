@@ -6,14 +6,14 @@ const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
  * the boss), `bossSwing` (the scythe cutting air), `bossHitPlayer` (the scythe
  * on the exile), `playerSwing`, `block`. Each of those is a LIST of takes in
  * asset-paths.js; a play picks one at random and never repeats the last. */
-export const SOUNDS=['footstep','impact','swing','groundSlam','darkFire','bossRoar','playerHitArmor','bossSwing','bossHitPlayer','playerSwing','block','playerFootstep'];
+export const SOUNDS=['footstep','impact','swing','groundSlam','darkFire','bossRoar','playerHitArmor','bossSwing','bossHitPlayer','playerSwing','block','playerFootstep','terereSip'];
 // Per-sound trim so the boss layer sits above the fight without clipping it.
 // bossRoar is trimmed: the generated file peaks at 0 dBFS, so playing it at
 // full level and then summing the convolver send could crackle on a loud system.
 // The round-2 takes all peak within 1 dB of 0 dBFS; the trims below put the
 // chosen files at comparable loudness (RMS measured with ffmpeg astats, see
 // docs/round-2-2026-09-16/FX-notes.md) with the boss's hit on top.
-export const SOUND_LEVEL={swing:.6,darkFire:.5,groundSlam:1,bossRoar:.7,playerHitArmor:.8,bossSwing:.7,bossHitPlayer:1,playerSwing:.55,block:.85};
+export const SOUND_LEVEL={swing:.6,darkFire:.5,groundSlam:1,bossRoar:.7,playerHitArmor:.8,bossSwing:.7,bossHitPlayer:1,playerSwing:.55,block:.85,terereSip:.75};
 export const soundLevel=name=>SOUND_LEVEL[name]??.8;
 /** The round-2 slots are lists of generated takes whose loudness differs by up
  * to 8 dB (RMS -13.7 to -27.4 dBFS, ffmpeg astats). Each take is brought to a

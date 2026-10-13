@@ -81,6 +81,8 @@ export const ASSETS={
  bossSwing:chosenSounds('bossSwing',[new URL('../../assets/one-heavy-two-handed-scythe-swing-whoosh-cmu1fwbo.mp3',import.meta.url).href]),
  bossHitPlayer:chosenSounds('bossHitPlayer',[new URL('../../assets/one-powerful-heavy-steel-scythe-impact-a-cmu1fwan.mp3',import.meta.url).href]),
  playerSwing:chosenSounds('playerSwing',[new URL('../../assets/one-heavy-two-handed-scythe-swing-whoosh-cmu1fwbo.mp3',import.meta.url).href]),
+ // The bombilla slurp of the Paraguayan player's tereré heal (npx genex sfx, generation cmv62f8dz03gr3jl79uskbp00).
+ terereSip:sfxUrl('assets/sfx/terere-sip-cmv62f8d.mp3'),
  playerFootstep:chosenSounds('playerFootstep',[new URL('../../assets/a-single-muted-heavy-armored-boot-footst-cmu1i7mt.mp3',import.meta.url).href]),
  block:chosenSounds('block',[new URL('../../assets/one-powerful-heavy-steel-scythe-impact-a-cmu1fwan.mp3',import.meta.url).href]),
 };
