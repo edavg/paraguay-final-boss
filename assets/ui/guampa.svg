@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 96">
+  <!-- The tereré guampa for the HUD draught count: horn cup, silver bands, yerba and bombilla. -->
+  <defs>
+    <linearGradient id="horn" x1="0" x2="1">
+      <stop offset="0" stop-color="#3a2416"/>
+      <stop offset=".45" stop-color="#8a5a34"/>
+      <stop offset="1" stop-color="#2c1a10"/>
+    </linearGradient>
+    <linearGradient id="silver" x1="0" x2="1">
+      <stop offset="0" stop-color="#8d8a84"/>
+      <stop offset=".5" stop-color="#ece8df"/>
+      <stop offset="1" stop-color="#76736d"/>
+    </linearGradient>
+  </defs>
+  <path d="M30 40 L46 4" stroke="url(#silver)" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M44.2 5.6 L48.4 7.4" stroke="#ece8df" stroke-width="4" stroke-linecap="round"/>
+  <path d="M14 38 Q13 70 20 86 Q32 94 44 86 Q51 70 50 38 Z" fill="url(#horn)"/>
+  <ellipse cx="32" cy="38" rx="18" ry="4.6" fill="#55722b"/>
+  <ellipse cx="32" cy="38" rx="18" ry="4.6" fill="none" stroke="url(#silver)" stroke-width="3"/>
+  <path d="M17.6 78 Q32 84 46.4 78" stroke="url(#silver)" stroke-width="3" fill="none"/>
+</svg>

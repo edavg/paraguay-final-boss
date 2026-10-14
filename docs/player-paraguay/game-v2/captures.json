@@ -1,0 +1,66 @@
+{
+ "base": "http://127.0.0.1:5179",
+ "quality": "high",
+ "gpu": true,
+ "results": [
+  {
+   "name": "side",
+   "yaw": 110,
+   "pitch": 0.1,
+   "distance": 3,
+   "wait": 3500,
+   "lock": false,
+   "file": "docs/player-paraguay/game-v2/side.jpg",
+   "status": "fighting",
+   "view": {
+    "yaw": 1.9198621771937625,
+    "pitch": 0.1,
+    "distance": 3
+   },
+   "player": {
+    "x": 0,
+    "z": 8,
+    "yaw": 3.141592653589793
+   },
+   "boss": {
+    "x": 0,
+    "z": -0.46985510591350443
+   },
+   "bossAction": "fissure",
+   "playerAction": null,
+   "calls": 246,
+   "triangles": 3464193,
+   "fps": "31 FPS · p95 50.0 ms"
+  },
+  {
+   "name": "front",
+   "yaw": 180,
+   "pitch": 0.08,
+   "distance": 3.2,
+   "wait": 2500,
+   "lock": false,
+   "file": "docs/player-paraguay/game-v2/front.jpg",
+   "status": "fighting",
+   "view": {
+    "yaw": 3.141592653589793,
+    "pitch": 0.08,
+    "distance": 3.2
+   },
+   "player": {
+    "x": -6.868973129126692e-17,
+    "z": 8.560894221412168,
+    "yaw": 3.141592653589793
+   },
+   "boss": {
+    "x": -4.1465301690476575e-18,
+    "z": 0.07529587707809157
+   },
+   "bossAction": null,
+   "playerAction": null,
+   "calls": 225,
+   "triangles": 3244128,
+   "fps": "32 FPS · p95 50.0 ms"
+  }
+ ],
+ "errors": []
+}

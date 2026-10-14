@@ -1,0 +1,68 @@
+{
+ "base": "http://127.0.0.1:5179",
+ "quality": "high",
+ "gpu": true,
+ "results": [
+  {
+   "name": "sip",
+   "yaw": 150,
+   "pitch": 0.12,
+   "distance": 2.4,
+   "wait": 950,
+   "lock": false,
+   "file": "docs/player-paraguay/game-v3/sip.jpg",
+   "status": "fighting",
+   "view": {
+    "yaw": 2.6179938779914944,
+    "pitch": 0.12,
+    "distance": 2.4
+   },
+   "player": {
+    "x": 0,
+    "z": 8,
+    "yaw": 3.141592653589793
+   },
+   "boss": {
+    "x": 0,
+    "z": -0.8392666666664506
+   },
+   "bossAction": null,
+   "playerAction": "heal",
+   "calls": 240,
+   "triangles": 3674746,
+   "fps": "24 FPS · p95 50.1 ms"
+  },
+  {
+   "name": "sipside",
+   "yaw": 100,
+   "pitch": 0.1,
+   "distance": 2.6,
+   "wait": 1000,
+   "lock": false,
+   "file": "docs/player-paraguay/game-v3/sipside.jpg",
+   "status": "fighting",
+   "view": {
+    "yaw": 1.7453292519943295,
+    "pitch": 0.1,
+    "distance": 2.6
+   },
+   "player": {
+    "x": 0,
+    "z": 8,
+    "yaw": 3.141592653589793
+   },
+   "boss": {
+    "x": 0,
+    "z": -0.46985510591350443
+   },
+   "bossAction": "fissure",
+   "playerAction": "heal",
+   "calls": 248,
+   "triangles": 3829544,
+   "fps": "25 FPS · p95 50.1 ms"
+  }
+ ],
+ "errors": [
+  "TypeError: Failed to fetch\n    at FileLoader.load (http://127.0.0.1:5179/node_modules/.vite/deps/three.module-Bj7iJlUn.js?v=6f7f00ab:31825:3)\n    at GLTFLoader.load (http://127.0.0.1:5179/node_modules/.vite/deps/three_addons_loaders_GLTFLoader__js.js?v=d3db3db5:194:10)\n    at http://127.0.0.1:5179/node_modules/.vite/deps/three.module-Bj7iJlUn.js?v=6f7f00ab:31632:10\n    at new Promise (<anonymous>)\n    at GLTFLoader.loadAsync (http://127.0.0.1:5179/node_modules/.vite/deps/three.module-Bj7iJlUn.js?v=6f7f00ab:31631:10)\n    at buildArena (http://127.0.0.1:5179/src/game/arena.js?t=1791858043870:510:20)\n    at async http://127.0.0.1:5179/src/game/main.js?t=1791858157005:18:64"
+ ]
+}

@@ -1,0 +1,37 @@
+{
+ "base": "http://127.0.0.1:5179",
+ "quality": "high",
+ "gpu": true,
+ "results": [
+  {
+   "name": "face",
+   "yaw": 180,
+   "pitch": 0.05,
+   "distance": 2.2,
+   "wait": 2500,
+   "lock": false,
+   "file": "docs/boss-man/game-v1/face.jpg",
+   "status": "fighting",
+   "view": {
+    "yaw": 3.141592653589793,
+    "pitch": 0.05,
+    "distance": 2.2
+   },
+   "player": {
+    "x": -6.868973129126692e-17,
+    "z": 0.36089422141217714,
+    "yaw": 3.141592653589793
+   },
+   "boss": {
+    "x": 0,
+    "z": -3.6002777078564576
+   },
+   "bossAction": "fissure",
+   "playerAction": null,
+   "calls": 232,
+   "triangles": 3876550,
+   "fps": "26 FPS · p95 50.0 ms"
+  }
+ ],
+ "errors": []
+}

@@ -1,0 +1,74 @@
+{
+ "base": "http://127.0.0.1:5179",
+ "results": [
+  {
+   "name": "playerRig",
+   "character": "assets/player-paraguay/player-paraguay-rig-v1.glb&playerManifest",
+   "time": "2.633",
+   "file": "docs/player-paraguay/review-v1/playerRig.jpg",
+   "readout": null,
+   "stage": "Idle"
+  },
+  {
+   "name": "idle-quarter",
+   "character": "player",
+   "clip": "idle",
+   "time": "1",
+   "view": "quarter",
+   "file": "docs/player-paraguay/review-v1/idle-quarter.jpg",
+   "readout": null,
+   "stage": "Idle"
+  },
+  {
+   "name": "run-side",
+   "character": "player",
+   "clip": "run-forward",
+   "time": "0.25",
+   "view": "side",
+   "file": "docs/player-paraguay/review-v1/run-side.jpg",
+   "readout": null,
+   "stage": "Run"
+  },
+  {
+   "name": "light-quarter",
+   "character": "player",
+   "clip": "light",
+   "time": "0.55",
+   "view": "quarter",
+   "file": "docs/player-paraguay/review-v1/light-quarter.jpg",
+   "readout": null,
+   "stage": "Light attack"
+  },
+  {
+   "name": "heavy-front",
+   "character": "player",
+   "clip": "heavy",
+   "time": "0.95",
+   "view": "front",
+   "file": "docs/player-paraguay/review-v1/heavy-front.jpg",
+   "readout": null,
+   "stage": "Heavy attack"
+  },
+  {
+   "name": "block-quarter",
+   "character": "player",
+   "clip": "block",
+   "time": "1",
+   "view": "quarter",
+   "file": "docs/player-paraguay/review-v1/block-quarter.jpg",
+   "readout": null,
+   "stage": "Shield guard"
+  },
+  {
+   "name": "dodge-side",
+   "character": "player",
+   "clip": "dodge",
+   "time": "0.35",
+   "view": "side",
+   "file": "docs/player-paraguay/review-v1/dodge-side.jpg",
+   "readout": null,
+   "stage": "Forward roll"
+  }
+ ],
+ "errors": []
+}

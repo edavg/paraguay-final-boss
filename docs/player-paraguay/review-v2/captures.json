@@ -1,0 +1,72 @@
+{
+ "base": "http://127.0.0.1:5179",
+ "results": [
+  {
+   "name": "noweap-front",
+   "character": "player",
+   "clip": "walk-forward",
+   "time": "0.5",
+   "view": "body",
+   "facing": "",
+   "weapons": "0",
+   "file": "docs/player-paraguay/review-v2/noweap-front.jpg",
+   "readout": null,
+   "stage": "Caminar"
+  },
+  {
+   "name": "noweap-quarter",
+   "character": "player",
+   "clip": "idle",
+   "time": "1",
+   "view": "quarter",
+   "facing": "",
+   "weapons": "0",
+   "file": "docs/player-paraguay/review-v2/noweap-quarter.jpg",
+   "readout": null,
+   "stage": "Reposo"
+  },
+  {
+   "name": "noweap-back",
+   "character": "player",
+   "clip": "run-forward",
+   "time": "0.4",
+   "view": "back",
+   "facing": "",
+   "weapons": "0",
+   "file": "docs/player-paraguay/review-v2/noweap-back.jpg",
+   "readout": null,
+   "stage": "Correr"
+  },
+  {
+   "name": "dodge-side",
+   "character": "player",
+   "clip": "dodge",
+   "time": "0.35",
+   "view": "side",
+   "file": "docs/player-paraguay/review-v2/dodge-side.jpg",
+   "readout": null,
+   "stage": "Rodadura al frente"
+  },
+  {
+   "name": "dodge-late",
+   "character": "player",
+   "clip": "dodge",
+   "time": "0.7",
+   "view": "side",
+   "file": "docs/player-paraguay/review-v2/dodge-late.jpg",
+   "readout": null,
+   "stage": "Rodadura al frente"
+  },
+  {
+   "name": "run-side",
+   "character": "player",
+   "clip": "run-forward",
+   "time": "0.25",
+   "view": "side",
+   "file": "docs/player-paraguay/review-v2/run-side.jpg",
+   "readout": null,
+   "stage": "Correr"
+  }
+ ],
+ "errors": []
+}

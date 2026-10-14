@@ -1,0 +1,56 @@
+{
+ "base": "http://127.0.0.1:5179",
+ "results": [
+  {
+   "name": "h0",
+   "character": "player",
+   "clip": "heal",
+   "time": "0.25",
+   "view": "quarter",
+   "file": "docs/player-paraguay/review-v3/h0.jpg",
+   "readout": null,
+   "stage": "Sanación"
+  },
+  {
+   "name": "h1",
+   "character": "player",
+   "clip": "heal",
+   "time": "0.6",
+   "view": "quarter",
+   "file": "docs/player-paraguay/review-v3/h1.jpg",
+   "readout": null,
+   "stage": "Sanación"
+  },
+  {
+   "name": "h2",
+   "character": "player",
+   "clip": "heal",
+   "time": "0.75",
+   "view": "side",
+   "file": "docs/player-paraguay/review-v3/h2.jpg",
+   "readout": null,
+   "stage": "Sanación"
+  },
+  {
+   "name": "h3",
+   "character": "player",
+   "clip": "heal",
+   "time": "0.75",
+   "view": "front",
+   "file": "docs/player-paraguay/review-v3/h3.jpg",
+   "readout": null,
+   "stage": "Sanación"
+  },
+  {
+   "name": "h4",
+   "character": "player",
+   "clip": "heal",
+   "time": "0.75",
+   "view": "head",
+   "file": "docs/player-paraguay/review-v3/h4.jpg",
+   "readout": null,
+   "stage": "Sanación"
+  }
+ ],
+ "errors": []
+}

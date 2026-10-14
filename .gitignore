@@ -203,11 +203,12 @@ assets/combat-revision/boss/v62-paced-aimed-slam/*
 # Python bytecode caches (one was tracked by accident)
 __pycache__/
 
-# The boss's rules (attacks, weights, timings) are game code: the build imports this manifest (13 Oct 2026).
-!docs/boss-man/
-docs/boss-man/*
-!docs/boss-man/boss-man-rig-v1-manifest.json
-# The boss model the game loads on desktop (13 Oct 2026); the phone copy is under assets/mobile/.
+# The two characters, whole (player-paraguay, boss-man): game-loaded rigs plus the sources, concepts and rig manifests they
+# were built from, so a clone can rebuild or re-retarget them. Same for the asset record and the visual references.
+!assets/player-paraguay/
 !assets/boss-man/
-assets/boss-man/*
-!assets/boss-man/boss-man-rig-v1.glb
+!docs/player-paraguay/
+!docs/boss-man/
+!docs/asset-plan.md
+!docs/references/
+!assets/ui/guampa.svg
