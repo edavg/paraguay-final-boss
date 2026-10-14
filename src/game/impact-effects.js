@@ -417,7 +417,8 @@ export function createCombatEffects({scene,camera,effects,actors,fight,audio,pos
       pendingShake=Math.max(pendingShake,.58*power);
       pendingHitStop=Math.max(pendingHitStop,.09);pendingFov=3;
       bossFlash=1;auraSpike=1;auraFlare=1;
-     }else burst.warnAt(at,Math.pow(Math.min(1,bossAction.elapsed/Math.max(.1,start)),1.5));
+     // A leaping burst marks where he will land (motion.js stepLeap), not the floor he springs from.
+     }else burst.warnAt(bossAction.leap?.to?lowest.set(bossAction.leap.to.x,0,bossAction.leap.to.z):at,Math.pow(Math.min(1,bossAction.elapsed/Math.max(.1,start)),1.5));
     }
     // Fissure (round 3): a seam of coals lengthens along the boss's facing through the windup; when the
     // window opens the floor tears along it and the front races out at the rule's own pace
@@ -573,7 +574,7 @@ export function createCombatEffects({scene,camera,effects,actors,fight,audio,pos
      if(broken){eventShake=Math.max(eventShake,.34);eventHitStop=Math.max(eventHitStop,.055);play('slam',.45,playerAt);}
     }
    }
-   if(type==='block'&&playerAt)effects.dustWall(playerAt,{count:4,radius:.18,speed:1.6,size:.22,opacity:.18,tint:0x3a3f45,rise:.7});
+   if((type==='block'||type==='parry')&&playerAt)effects.dustWall(playerAt,{count:4,radius:.18,speed:1.6,size:.22,opacity:.18,tint:0x3a3f45,rise:.7});
    if(type==='phase-change'){
     const at=bossAt||new T.Vector3();
     impacts.strike({x:at.x,z:at.z},{power:1.2,radius:2.4,ringLife:.85,decalLife:3.4,kind:'dust'});

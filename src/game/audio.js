@@ -6,21 +6,35 @@ const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
  * the boss), `bossSwing` (the scythe cutting air), `bossHitPlayer` (the scythe
  * on the exile), `playerSwing`, `block`. Each of those is a LIST of takes in
  * asset-paths.js; a play picks one at random and never repeats the last. */
-export const SOUNDS=['footstep','impact','swing','groundSlam','darkFire','bossRoar','playerHitArmor','bossSwing','bossHitPlayer','playerSwing','block','playerFootstep','terereSip'];
+export const SOUNDS=['footstep','impact','swing','groundSlam','darkFire','bossRoar','playerHitArmor','bossSwing','bossHitPlayer','playerSwing','block','playerFootstep','terereSip','parry','stagger'];
 // Per-sound trim so the boss layer sits above the fight without clipping it.
 // bossRoar is trimmed: the generated file peaks at 0 dBFS, so playing it at
 // full level and then summing the convolver send could crackle on a loud system.
 // The round-2 takes all peak within 1 dB of 0 dBFS; the trims below put the
 // chosen files at comparable loudness (RMS measured with ffmpeg astats, see
 // docs/round-2-2026-09-16/FX-notes.md) with the boss's hit on top.
-export const SOUND_LEVEL={swing:.6,darkFire:.5,groundSlam:1,bossRoar:.7,playerHitArmor:.8,bossSwing:.7,bossHitPlayer:1,playerSwing:.55,block:.85,terereSip:.5}; // terereSip .75 -> .5 (13 Oct 2026, the user: a bit quieter)
+export const SOUND_LEVEL={swing:.6,darkFire:.5,groundSlam:1,bossRoar:.7,playerHitArmor:.8,bossSwing:.7,bossHitPlayer:1,playerSwing:.55,block:.85,terereSip:.5,parry:1,stagger:.75}; // terereSip .75 -> .5 (13 Oct 2026, the user: a bit quieter)
 export const soundLevel=name=>SOUND_LEVEL[name]??.8;
 /** The round-2 slots are lists of generated takes whose loudness differs by up
  * to 8 dB (RMS -13.7 to -27.4 dBFS, ffmpeg astats). Each take is brought to a
  * common RMS at decode time, within +-5 dB, so SOUND_LEVEL sets the mix and a
  * new take dropped into the JSON arrives at the same loudness as the others.
  * Last night's six sounds keep their hand-tuned levels. */
-export const NORMALIZED=new Set(['playerHitArmor','bossSwing','bossHitPlayer','playerSwing','block']);
+export const NORMALIZED=new Set(['playerHitArmor','bossSwing','bossHitPlayer','playerSwing','block','stagger']);
+// The parry takes are short transients already peaking at -1..0 dBFS: RMS levelling would push the sparsest past clipping.
+/** Keep only `start`..`end` seconds of a decoded take, fading the last `fade` seconds out (a generated file with a
+ * stray second event after its hit plays as one clean hit). No trim, or an invalid one, keeps the buffer whole. */
+export function trimBuffer(context,buffer,trim,fade=.25){
+ if(!buffer||!Array.isArray(trim))return buffer;
+ const rate=buffer.sampleRate,from=Math.max(0,Math.round(trim[0]*rate)),to=Math.min(buffer.length,Math.round(trim[1]*rate));
+ if(!(to>from))return buffer;
+ const out=context.createBuffer(buffer.numberOfChannels,to-from,rate),fadeLength=Math.min(to-from,Math.round(fade*rate));
+ for(let channel=0;channel<buffer.numberOfChannels;channel++){
+  const source=buffer.getChannelData(channel),target=out.getChannelData(channel);
+  for(let i=0;i<to-from;i++){const tail=to-from-i;target[i]=source[from+i]*(tail<fadeLength?tail/fadeLength:1);}
+ }
+ return out;
+}
 export const TARGET_RMS=.1; // -20 dBFS
 export const takeGain=rms=>Number.isFinite(rms)&&rms>0?clamp(TARGET_RMS/rms,.56,1.78):1;
 export function bufferRms(buffer){
@@ -91,7 +105,8 @@ export class GameAudio{
    this.room.connect(low);low.connect(high);high.connect(wet);wet.connect(this.master);
    this.initializing=Promise.all([...this.pending].map(async([name,promise])=>{
     const takes=await promise;if(!takes)return;
-    const decoded=await Promise.all(takes.map(async bytes=>{if(!bytes)return null;try{return await context.decodeAudioData(bytes);}catch{return null;/* HTML audio remains available. */}}));
+    const trims=this.paths.soundTrims?.[name];
+    const decoded=await Promise.all(takes.map(async(bytes,index)=>{if(!bytes)return null;try{return trimBuffer(context,await context.decodeAudioData(bytes),trims?.[index]);}catch{return null;/* HTML audio remains available. */}}));
     if(!decoded.some(Boolean))return;
     this.buffers.set(name,decoded);
     if(NORMALIZED.has(name))this.takeGains.set(name,decoded.map(buffer=>buffer?takeGain(bufferRms(buffer)):1));
@@ -115,7 +130,8 @@ export class GameAudio{
  setMusic(value){this.musicLevel=clamp(value,0,1)*.375;/* 25 % under round 2 (user, 16 Sep) */if(this.musicGain){this.musicGain.gain.value=this.musicLevel;this.music.volume=1;}else this.music.volume=this.musicLevel;}
  setSfx(value){this.volume=clamp(value,0,1);this.master?.gain.setTargetAtTime(this.volume,this.context.currentTime,.015);}
  status(){return`${this.context?.state==='running'?'Audio espacial':this.suspended?'Audio en pausa':'Audio listo'} · ${this.buffers.size}/${SOUNDS.length} sonidos · ${this.pool.size} voces`;}
- play(name,gain=1,position){
+ /** `delay` seconds schedules the sound later on the audio clock (a layer that lands just after the hit). */
+ play(name,gain=1,position,{delay=0}={}){
   if(!this.enabled||this.suspended)return;
   const take=pickTake(this.paths[name],this.lastTake.get(name)??-1);
   if(!take.value)return;
@@ -129,7 +145,7 @@ export class GameAudio{
    let disposed=false;const voice={stop:()=>{try{source.stop();}catch{}},dispose:()=>{
     if(disposed)return;disposed=true;source.disconnect();volume.disconnect();pan.disconnect();this.pool.delete(voice);
    }};
-   source.onended=voice.dispose;this.pool.add(voice);source.start();return;
+   source.onended=voice.dispose;this.pool.add(voice);source.start(context.currentTime+Math.max(0,delay));return;
   }
   const element=new Audio(take.value);element.volume=level*this.volume;element.playbackRate=.93+Math.random()*.10;
   const voice={stop:()=>element.pause(),dispose:()=>this.pool.delete(voice)};this.pool.add(voice);

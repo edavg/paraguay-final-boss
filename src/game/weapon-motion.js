@@ -1,6 +1,12 @@
 // Shared by animation and collision: positions are metres, local +Z is forward.
 export const PLAYER_TIMING={light:{windup:.28,active:.22,recovery:.42,damage:55,cost:22},heavy:{windup:.68,active:.28,recovery:.68,damage:118,cost:36}};
 export const BOSS_TIMING={sweep:{windup:1.1,active:.38,recovery:1.25,damage:29},slam:{windup:1.5,active:.28,recovery:1.6,damage:44},combo:{windup:1.25,active:.95,recovery:1.45,damage:25}};
+/** The shield bash that replaced the held guard (13 Oct 2026): a boss swing that lands inside `window` (action seconds)
+ * while the player faces him is deflected for no damage and staggers him for BOSS_STAGGER.duration. The fire attacks
+ * (radial, linear, targeted) cannot be parried. `travelCurve` is the short lunge behind the shove, in metres. */
+export const PLAYER_PARRY={duration:.8,cost:14,window:[.06,.34],travelCurve:[[0,0],[.08,0],[.2,.26],[.34,.34],[.8,.36]]};
+/** How long a parried boss reels, and his pause after it before he chooses again. */
+export const BOSS_STAGGER={duration:1.7,cooldown:.35};
 /** Distances authored in a derived action (see `actions` below) are in the same authored metres
  * as the clip bands; `withActorScale` only scales `clips`, so they are scaled here once. */
 const ACTION_DISTANCE_KEYS=['engagementRange','preferredDistance','reach','closeDistance','width'];
@@ -9,7 +15,7 @@ const ACTION_DISTANCE_KEYS=['engagementRange','preferredDistance','reach','close
  * (1.53 s in all); hit windows and effects stay in clip time. A manifest `speed`/`recoverySpeed` on the clip wins. */
 export const PLAYER_PACE={heavy:{speed:1.28,recoverySpeed:1.5}};
 export function createActionTimings(metadata={},boss=false){
- const base=boss?{...BOSS_TIMING,awaken:{duration:2.6},death:{duration:2}}:{...PLAYER_TIMING,dodge:{cost:26,duration:.64,invulnerable:[.045,.43],travelDuration:.48,distance:3.4},heal:{cost:0,duration:1.4,healAt:.92},hit:{duration:.4},death:{duration:2}};
+ const base=boss?{...BOSS_TIMING,awaken:{duration:2.6},stagger:{...BOSS_STAGGER},death:{duration:2}}:{...PLAYER_TIMING,parry:{...PLAYER_PARRY},dodge:{cost:26,duration:.64,invulnerable:[.045,.43],travelDuration:.48,distance:3.4},heal:{cost:0,duration:1.4,healAt:.92},hit:{duration:.4},death:{duration:2}};
  const timings=Object.fromEntries(Object.entries(base).map(([name,spec])=>{
   const override=metadata.clips?.[name]||{},merged={...spec,...override};
   // A supplied total length without individual phase marks scales the known windows.
@@ -49,6 +55,14 @@ export function createActionTimings(metadata={},boss=false){
    const total=merged.segments.reduce((sum,[,,seconds])=>sum+seconds,0);
    if(!('duration' in spec))merged.duration=total;
    else if(Math.abs(spec.duration-total)>1e-6)throw new RangeError(`actions.${name}: duration ${spec.duration} does not match its segments (${total})`);
+  }
+  // A leap (src/game/boss-leap.js): take-off and landing in action seconds, its lengths in authored metres.
+  if(spec.leap){
+   const leap={...spec.leap};
+   if(!(Number.isFinite(leap.takeoff)&&Number.isFinite(leap.land)&&leap.land>leap.takeoff))throw new RangeError(`actions.${name}: a leap needs takeoff < land (action seconds)`);
+   if(!(leap.height>0&&leap.gap>=0))throw new RangeError(`actions.${name}: a leap needs a positive height and a gap`);
+   for(const key of ['height','crouch','impact','gap','maxDistance'])if(Number.isFinite(leap[key]))leap[key]*=scale;
+   leap.crouch??=0;merged.leap=leap;
   }
   if(merged.radial&&!(merged.reach>0))throw new RangeError(`actions.${name}: a radial action needs a positive reach`);
   if(merged.linear&&!(merged.reach>0&&merged.width>0))throw new RangeError(`actions.${name}: a linear action needs a positive reach and width`);

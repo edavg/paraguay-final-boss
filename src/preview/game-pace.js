@@ -11,5 +11,5 @@ export function gamePlaybackRate(character,name,metadata={}) {
   speed=name.startsWith('walk-')?metadata.guardSpeed??1.45:
    runSpeedForDirection({x:Math.sin(angle),z:Math.cos(angle)},0,metadata);
  }
- return Math.min(1.4,Math.max(.5,speed/clip.sourceSpeed))*(clip.rate??1);
+ return Math.min(clip.maxRate??1.4,Math.max(.5,speed/clip.sourceSpeed))*(clip.rate??1);
 }

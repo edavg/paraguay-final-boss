@@ -65,7 +65,7 @@ export class ActorAnimation {
     }
     const sourceSpeed = meta.sourceSpeed ?? this.metadata.locomotionSpeed;
     const desiredRate = locomotion(name) && sourceSpeed > 0
-      ? MathUtils.clamp(speed / sourceSpeed, .5, 1.4) * (meta.rate ?? 1) : (meta.rate ?? 1);
+      ? MathUtils.clamp(speed / sourceSpeed, .5, meta.maxRate ?? 1.4) * (meta.rate ?? 1) : (meta.rate ?? 1);
     this.rate = MathUtils.damp(this.rate, desiredRate, 10, dt);
     this.yawOffset = 0;
     for (const layer of this.layers.values()) this.yawOffset += layer.weight * layer.yaw;

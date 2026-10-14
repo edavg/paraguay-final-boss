@@ -52,8 +52,8 @@ test('the fight resolves the fissure by line geometry, once, and the roll and th
  fight.reset();fight.start();fight.request('dodge');run(fight,.2,geo({distance:5}));
  fight.boss.action={name:'fissure',elapsed:2.30,hits:[]};run(fight,.45,geo({along:5,lateral:0}));
  assert.equal(fight.player.health,100);assert.equal(fight.stats.evades,1);
- fight.reset();fight.start();fight.player.blocking=true;fight.boss.action={name:'fissure',elapsed:2.30,hits:[]};run(fight,.45,geo({along:5,lateral:0}));
- assert.equal(fight.player.health,95);assert.equal(fight.stats.blocks,1);
+ fight.reset();fight.start();fight.boss.action={name:'fissure',elapsed:2.30,hits:[]};for(let i=0;i<120&&fight.player.health===100;i++){if(fight.boss.action.elapsed>2.5&&!fight.player.action){fight.request('parry');fight.player.action.elapsed=.1;}fight.step(1/120,geo({along:5,lateral:0}));}
+ assert.equal(fight.player.health,66,'the fissure cannot be parried');assert.equal(fight.stats.parries,0);
 });
 
 test('the facing frame comes from the motion state: along is down the boss facing, lateral to its left',()=>{

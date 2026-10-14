@@ -13,6 +13,8 @@ import {FootContacts} from './contact-feedback.js';
 import {SoleClearance} from './sole-clearance.js';
 import {FootPlant} from './foot-plant.js';
 import {LocomotionFootBlend} from './locomotion-foot-blend.js';
+import {BossFootwork} from './boss-footwork.js';
+import {BossLeapPose,leapFlight} from './boss-leap.js';
 import {actorDimensions} from './actor-scale.js';
 import {createHeadEffect} from './head-effect.js';
 import {applyClipAdjustments} from './clip-adjustments.js';
@@ -20,6 +22,7 @@ import {FacingGizmo} from './facing-gizmo.js';
 import {GazeLock} from './gaze-lock.js';
 import {createShieldStrap} from './shield-strap.js';
 import {createShieldDrop} from './shield-drop.js';
+import {ShieldBash,BossStagger} from './shield-bash.js';
 const loader=new GLTFLoader();
 /** Shield placement in the ShieldSocket frame, solved by scripts/solve-shield-mount.mjs:
  * face normal along the fist, height axis upright. The legacy fallback lay along the forearm. */
@@ -88,8 +91,16 @@ export async function loadActors(scene,paths,{textureCap=0,serial=false}={}){
  }
  return{player,boss};
 }
-export function createActor(gltf,height,isBoss,rigged,metadata={}){const root=new T.Group(),visualRoot=new T.Group();root.add(visualRoot);const dimensions=actorDimensions(isBoss,metadata);root.scale.setScalar(dimensions.scale);if(rigged){visualRoot.add(gltf.scene);gltf.scene.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;n.frustumCulled=false;}});}else visualRoot.add(prepare(gltf.scene,height,-Math.PI/2));root.name=isBoss?'Gran demonio rojo':'Exiliado de Espinas';applyClipAdjustments(gltf.animations,metadata);const animation=new ActorAnimation(gltf.scene,gltf.animations,metadata),mixer=animation.mixer,clips=animation.actions;const timings=createActionTimings(metadata,isBoss),footContacts=new FootContacts(),soleClearance=new SoleClearance(gltf.scene,{maxLift:.06*dimensions.scale}),footPlant=!isBoss&&rigged?new FootPlant(gltf.scene,soleClearance):null,locomotionFootBlend=!isBoss&&rigged?new LocomotionFootBlend(gltf.scene,soleClearance,gltf.animations):null,skirt=!isBoss&&rigged?SkirtSway.from(gltf.scene):null;const headEffect=isBoss&&rigged?createHeadEffect(gltf.scene.getObjectByName('mixamorigHead')):null,gazeLock=!isBoss&&rigged?new GazeLock(gltf.scene,root):null;const footBones=Object.fromEntries(['Left','Right'].map(side=>[side,gltf.scene.getObjectByName('mixamorig'+side+'Foot')]).filter(([,bone])=>bone));return{skirt,trim:null,guampa:null,headEffect,gazeLock,dimensions,worldScale:dimensions.scale,authoredHeight:height,locomotionFootBlend,footPlant,soleClearance,footContacts,footBones,footsteps:[],root,visualRoot,body:gltf.scene,animation,mixer,clips,metadata,timings,height:height*dimensions.scale,isBoss,lastPosition:new T.Vector3(),speed:0,deathTime:0,weapon:null,segment:null,previousSegment:null,reset(motion){
- this.shieldDrop?.reset();this.skirt?.reset();this.trim?.reset();this.animation.reset();this.headEffect?.reset();this.gazeLock?.reset();this.footContacts.reset();this.footsteps=[];this.current=null;this.lastAction=null;this.deathTime=0;this.speed=0;this.moving=false;this.moveDirection='forward';
+/** The clip under a pose layer: the bash runs the guard (`block`) at its own pace from the top; the stagger drives the
+ * boss's `hit` recoil to its peak, holds it, and plays it out over the last .3 s. */
+export function layerPlayback(action,timings,clips){
+ if(action?.name==='parry'&&clips.has('block')){const duration=clips.get('block').getClip().duration;return {name:'block',duration,action};}
+ if(action?.name==='stagger'&&clips.has('hit')){const duration=clips.get('hit').getClip().duration,total=actionDuration(timings.stagger)??1.7,peak=duration/2,t=action.elapsed||0;
+  const time=t<total-peak?Math.min(peak,t):Math.min(duration,peak+(t-(total-peak)));return {name:'hit',duration,action:{...action,elapsed:time}};}
+ return null;
+}
+export function createActor(gltf,height,isBoss,rigged,metadata={}){const root=new T.Group(),visualRoot=new T.Group();root.add(visualRoot);const dimensions=actorDimensions(isBoss,metadata);root.scale.setScalar(dimensions.scale);if(rigged){visualRoot.add(gltf.scene);gltf.scene.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;n.frustumCulled=false;}});}else visualRoot.add(prepare(gltf.scene,height,-Math.PI/2));root.name=isBoss?'Gran demonio rojo':'Exiliado de Espinas';applyClipAdjustments(gltf.animations,metadata);const animation=new ActorAnimation(gltf.scene,gltf.animations,metadata),mixer=animation.mixer,clips=animation.actions;const timings=createActionTimings(metadata,isBoss),footContacts=new FootContacts(),soleClearance=new SoleClearance(gltf.scene,{maxLift:.06*dimensions.scale}),footPlant=!isBoss&&rigged?new FootPlant(gltf.scene,soleClearance):null,locomotionFootBlend=!isBoss&&rigged?new LocomotionFootBlend(gltf.scene,soleClearance,gltf.animations):null,skirt=!isBoss&&rigged?SkirtSway.from(gltf.scene):null,footwork=isBoss&&rigged?new BossFootwork(gltf.scene,soleClearance,{scale:dimensions.scale}):null;const leap=footwork?new BossLeapPose(gltf.scene,footwork,{scale:dimensions.scale}):null;const headEffect=isBoss&&rigged?createHeadEffect(gltf.scene.getObjectByName('mixamorigHead')):null,gazeLock=!isBoss&&rigged?new GazeLock(gltf.scene,root):null,poseLayer=rigged?(isBoss?new BossStagger(gltf.scene,root):new ShieldBash(gltf.scene,root)):null;const footBones=Object.fromEntries(['Left','Right'].map(side=>[side,gltf.scene.getObjectByName('mixamorig'+side+'Foot')]).filter(([,bone])=>bone));return{poseLayer,footwork,leap,skirt,trim:null,guampa:null,headEffect,gazeLock,dimensions,worldScale:dimensions.scale,authoredHeight:height,locomotionFootBlend,footPlant,soleClearance,footContacts,footBones,footsteps:[],root,visualRoot,body:gltf.scene,animation,mixer,clips,metadata,timings,height:height*dimensions.scale,isBoss,lastPosition:new T.Vector3(),speed:0,deathTime:0,weapon:null,segment:null,previousSegment:null,reset(motion){
+ this.shieldDrop?.reset();this.skirt?.reset();this.footwork?.reset();this.trim?.reset();this.animation.reset();this.headEffect?.reset();this.gazeLock?.reset();this.footContacts.reset();this.footsteps=[];this.current=null;this.lastAction=null;this.deathTime=0;this.speed=0;this.moving=false;this.moveDirection='forward';
  this.root.position.set(motion.x,0,motion.z);this.root.rotation.y=motion.yaw;this.lastPosition.copy(this.root.position);this.previousPosition=this.root.position.clone();
  this.previousSegment=null;this.segment=null;
  },update(dt,time,state,motion){
@@ -114,12 +125,19 @@ export function createActor(gltf,height,isBoss,rigged,metadata={}){const root=ne
  const locomotion=this.isBoss?'walk-forward':(state.blocking&&this.clips.has('walk-'+direction)?'walk-':'run-')+direction;
  const name=action?.name||(this.moving?locomotion:state.blocking?'block':'idle');
  // A derived boss action (flurry, burst) plays its base clip at the clip time its segment program asks for.
- const playback=clipPlayback(action,this.timings);
+ // The shield bash plays over the guard in real time and the parried boss over his recoil (src/game/shield-bash.js).
+ const playback=clipPlayback(action,this.timings)??layerPlayback(action,this.timings,this.clips);
+ this.footwork?.restore();
  this.animation.update(dt,playback?playback.name:name,{action:playback?playback.action:action,token:state.health<=0?'death':state.action,duration:playback?playback.duration:actionDuration(this.timings[action?.name]),speed:this.speed});
  // Root displacement stays on the ground. Dodge rotation belongs to the skeleton clip;
  // the blended stance yaw turns a camera-facing capture toward the gameplay facing.
  this.visualRoot.rotation.set(0,this.animation.yawOffset||0,0);this.visualRoot.position.set(0,0,0);
  this.root.updateMatrixWorld(true);
+ this.poseLayer?.apply(action,actionDuration(this.timings[action?.name]));
+ // The boss's boots stay planted while he turns and step to follow; his walk sways over the stance boot (src/game/boss-footwork.js).
+ // Through a leap (the burst) the body flies over the floor: the boots ride with it instead of staying planted.
+ const flight=leapFlight(this.timings[action?.name]?.leap,action?.elapsed||0),leaping=flight>=0&&flight<1;
+ this.footwork?.apply(this.animation,motion,dt,{suspended:state.health<=0||!!action?.rawPose||leaping});
  // The gaze follows the opponent on top of the clip (dodge and death keep the captured head).
  this.gazeLock?.update(dt,{layers:this.animation.layers,raw:!!action?.rawPose});
  // Pure clips, actions and direct/raw inspection retain their original poses.
@@ -130,6 +148,8 @@ export function createActor(gltf,height,isBoss,rigged,metadata={}){const root=ne
   this.footPlant?.correct();
   const soleLift=this.soleClearance.lift();
   if(soleLift>0){this.visualRoot.position.y=soleLift/this.worldScale;this.visualRoot.updateMatrixWorld(true);}
+  // The leap's lift, crouch and tucked legs go on the corrected pose (src/game/boss-leap.js).
+  this.leap?.apply(state.health>0?action:null,this.timings[action?.name],this.visualRoot,this.root);
  }else if(this.footPlant)this.footPlant.maxCorrection=0;
  // The skirt panels and the shawl/sash trim are code cloth on top of the final pose (src/game/skirt-sway.js, player-trim.js).
  this.skirt?.update(dt);this.trim?.update(dt,this.root);this.guampa?.update(action);

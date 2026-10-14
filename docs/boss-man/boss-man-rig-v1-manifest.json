@@ -55,7 +55,9 @@
   },
   "walk-forward": {
    "duration": 3.9333333,
-   "sourceSpeed": 0.4094329,
+   "sourceSpeed": 0.336,
+   "maxRate": 1.8,
+   "sourceSpeedNote": "13 Oct 2026: the measured stance-boot speed of this retargeted clip (0.336 authored m/s, median over both boots); the old 0.409 was the Armored Death's. With maxRate 1.8 the cadence follows the unchanged locomotionSpeed (about 1.67x) and the boots no longer slide.",
    "blendIn": 0.28,
    "source": "approved combat-advance video via Uthana mxLm1X2ijEuU; Blender posture, contact and stride cleanup",
    "footPhaseOffsets": {
@@ -162,28 +164,60 @@
   },
   "burst": {
    "clip": "slam",
-   "duration": 4.9,
-   "windup": 2.36,
+   "segments": [
+    [
+     0,
+     1.6
+    ],
+    [
+     1.6,
+     2.05,
+     1.0
+    ],
+    [
+     2.05,
+     2.3,
+     0.3
+    ],
+    [
+     2.3,
+     4.9
+    ]
+   ],
+   "duration": 5.5,
+   "windup": 2.9,
    "active": 0.45,
-   "recovery": 2.09,
+   "recovery": 2.15,
    "hitWindows": [
     [
-     2.36,
-     2.81
+     2.9,
+     3.35
     ]
    ],
    "damage": 30,
    "radial": true,
    "reach": 2.461538,
    "speed": 1.35,
+   "recoverySpeed": 1.5,
    "cooldown": 0.75,
    "blendIn": 0.14,
    "engagementRange": [
     1.076923,
-    2.307692
+    3.230769
    ],
    "preferredDistance": 1.307692,
-   "source": "the approved slam clip: at 2.36 s the blade bottoms out in front and the pose holds until 3.3 s; dark fire erupts in a ring (radial distance check, no blade geometry) while the boss is planted, then the clip's own recovery backstep"
+   "leap": {
+    "takeoff": 1.6,
+    "land": 2.9,
+    "apex": 0.54,
+    "height": 2.0,
+    "crouch": 0.153846,
+    "impact": 0.192308,
+    "gap": 1.230769,
+    "maxDistance": 2.307692
+   },
+   "source": "the approved slam clip: at 2.36 s the blade bottoms out in front and the pose holds until 3.3 s; dark fire erupts in a ring (radial distance check, no blade geometry) while the boss is planted, then the clip's own recovery backstep",
+   "leapSource": "13 Oct 2026 (user: 'when he does the area attack on the floor I'd like him to jump, Dark Souls / Elden Ring style'): the eruption became a leaping slam. The slam clip runs to 1.6 s (the scythe cocked over his left shoulder) while he sinks into a crouch, springs at 1.6, hangs in the air while clip 1.6-2.05 raises the scythe overhead (1.0 s), drops through the chop (clip 2.05-2.3 in .3 s) and lands at 2.9 as the blade bottoms out; the ring erupts on the landing, the knees absorb it, then the clip's own planted hold and recovery. Flight .96 s wall, apex 2.6 m (14 Oct 2026, user: jump higher; was 1.6 m over .85 s), landing locked at take-off 1.6 m short of the player (at most 3 m away); band widened to 4.2 m to give the leap room. Lift, crouch, tuck and travel: src/game/boss-leap.js. All lengths authored metres."
   },
   "fissure": {
    "clip": "slam",
@@ -321,7 +355,7 @@
   "source": "assets/production/boss-supported-combat.glb",
   "height": 2.5,
   "legRatio": 0.77937002676459,
-  "scaled": "distance/travelDistance x legRatio; locomotionSpeed and the walk sourceSpeed kept from the Armored Death so the fight keeps its pace (slowing him by legRatio cut his attacks below the round-2 test floor): his shorter stride slides ~22% on the walk."
+  "scaled": "distance/travelDistance x legRatio; locomotionSpeed and the walk sourceSpeed kept from the Armored Death so the fight keeps its pace (slowing him by legRatio cut his attacks below the round-2 test floor): his shorter stride slid ~22% on the walk until 13 Oct 2026, when the walk sourceSpeed was re-measured and the cadence allowed up to 1.8x (the pace is unchanged)."
  },
  "cloth": false
 }

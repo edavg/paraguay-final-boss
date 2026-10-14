@@ -204,3 +204,14 @@ de pétalos en punta, corona roja de triángulos y borde festoneado).
 - `delayedSlam`: el slam se sostiene en lo alto (clip 1.9 → 1.98 durante 1.1 s) y luego cae; la ventana de golpe se corre lo mismo que dura la pausa.
 - `pillars`: anillos de brasas siguen al jugador, se fijan cuando clava la guadaña (2.36 s) y erupcionan a los 3.3 s. Un pilar en fase 1 y tres en fila en fase 2. El efecto reutiliza `BossBurst` (estrecho y alto).
 - Los datos están en `docs/boss-man/boss-man-rig-v1-manifest.json` (`actions`, `attackWeights`).
+
+## Sonidos del parry (13 oct 2026)
+
+- Pedido: el usuario quiso mejores sonidos para el parry, después de que el golpe de escudo reemplazó al bloqueo.
+- Generados con `npx genex sfx` (2 s cada uno) y descargados en `assets/sfx/parry/` (12 créditos):
+  - Parry (la guadaña resbala del escudo, cola metálica): cmv7hjxj501ts2tqoaj0rz23q, cmv7hk1zl01ty2tqornz02jco,
+    cmv7hk6jc01u52tqo4tmxea8t. Una cuarta toma, cmv7hkald01ue2tqoc9bhdua3, salió casi muda (pico 0.11) y no se usa.
+  - Aturdimiento del jefe (tropiezo, gruñido, golpe grave): cmv7hkepg01uk2tqogfyct9n5, cmv7hkiu801ut2tqon4e5a45b.
+- Cada toma trae un segundo evento suelto pasado ~1 s; `src/game/audio.js` reproduce solo la ventana de `ASSETS.soundTrims`
+  (asset-paths.js) con 0.25 s de fundido. Un parry suena con una toma de parry, la toma de bloqueo vieja a 0.45 por
+  debajo para dar cuerpo, y una toma de aturdimiento desde el jefe 0.12 s después.

@@ -84,6 +84,13 @@ export const ASSETS={
  playerSwing:chosenSounds('playerSwing',[new URL('../../assets/one-heavy-two-handed-scythe-swing-whoosh-cmu1fwbo.mp3',import.meta.url).href]),
  // The bombilla slurp of the Paraguayan player's tereré heal (npx genex sfx, generation cmv62f8dz03gr3jl79uskbp00).
  terereSip:sfxUrl('assets/sfx/terere-sip-cmv62f8d.mp3'),
+ // The parry (13 Oct 2026, user: better parry sounds): three generated takes of the scythe glancing off the shield
+ // (npx genex sfx, generations cmv7hjxj, cmv7hk1z, cmv7hk6j; a fourth, cmv7hkal, came back near silent and is unused)
+ // and two of the boss reeling (cmv7hkep, cmv7hkiu). Each file carries a stray second event after ~1 s, so audio.js
+ // plays only the [start, end] seconds in `soundTrims`, with a fade-out.
+ parry:['parry-1-cmv7hjxj','parry-2-cmv7hk1z','parry-3-cmv7hk6j'].map(name=>sfxUrl(`assets/sfx/parry/${name}.mp3`)),
+ stagger:['stagger-1-cmv7hkep','stagger-2-cmv7hkiu'].map(name=>sfxUrl(`assets/sfx/parry/${name}.mp3`)),
+ soundTrims:{parry:[[0,.95],[0,1.2],[.08,.85]],stagger:[[0,1.6],[0,1.5]]},
  playerFootstep:chosenSounds('playerFootstep',[new URL('../../assets/a-single-muted-heavy-armored-boot-footst-cmu1i7mt.mp3',import.meta.url).href]),
  block:chosenSounds('block',[new URL('../../assets/one-powerful-heavy-steel-scythe-impact-a-cmu1fwan.mp3',import.meta.url).href]),
 };

@@ -26,7 +26,7 @@ Abre http://127.0.0.1:4174/. Teclado y ratón en escritorio, controles táctiles
 | Ataque ligero | Clic izquierdo o J · pulsa de nuevo para el combo |
 | Ataque fuerte | Mantén J o K |
 | Rodadura al frente | Espacio |
-| Bloquear | Mantén el clic derecho o L |
+| Golpe de escudo (parada) | Clic derecho o L: un golpe que, a tiempo, desvía el tajo de la guadaña y aturde al jefe |
 | Sanar (tereré) | R — tres usos por pelea; la guampa entra al primer sorbo |
 | Fijar objetivo | Q o el botón central del ratón |
 | Cámara libre | Suelta el fijado y arrastra; doble clic captura el ratón |
@@ -35,7 +35,7 @@ Abre http://127.0.0.1:4174/. Teclado y ratón en escritorio, controles táctiles
 
 En un teléfono o una tableta el juego toma su propio camino (v1.1.0, `src/game/device.js`): un palo flotante a la izquierda; a la derecha, arrastra para mirar y pellizca para el zoom; y los botones Golpear (toca para el golpe, toca de nuevo para el combo, mantén para el fuerte), Rodar, Defensa, Tereré (el contador de usos), Fijar y Pausa. Usa un preset de render más ligero (Rendimiento por defecto, un presupuesto de píxeles en vez de los ratios del escritorio, sin AO de contacto, sin espejo de charcos por debajo de Alta, mapas de sombra a la mitad, 18 luces por píxel en vez de 28, sin SMAA en Rendimiento) y copias telefónicas de los dos rigs actuales con sus mapas de 4096 redimensionados a 1024 (`assets/mobile/`, hechas por `scripts/make-mobile-assets.py`; malla, rig y clips idénticos). El render de escritorio no cambia; `?touch=1` muestra la capa táctil en un escritorio.
 
-Los ajustes incluyen alternativas de movimiento y de escudo para quien prefiere pulsar una vez antes que mantener la tecla. Suelta el escudo durante la recuperación para regenerar la resistencia más rápido. Ambas fases tienen ventajas deliberadas, ataques comprometidos y ventanas de castigo. La repetición («Álzate de nuevo») está disponible tras cualquiera de los dos desenlaces.
+Los ajustes incluyen una alternativa de movimiento para quien prefiere pulsar una vez antes que mantener la tecla. El escudo ya no bloquea: el golpe de escudo para los tajos de la guadaña que llegan en su ventana (0.06–0.34 s), sin daño, y deja al jefe aturdido 1.7 s; el fuego (anillo, fisura, pilares) no se para. Ambas fases tienen ventajas deliberadas, ataques comprometidos y ventanas de castigo. La repetición («Álzate de nuevo») está disponible tras cualquiera de los dos desenlaces.
 
 ## Assets y autoría
 

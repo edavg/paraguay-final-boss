@@ -3,6 +3,7 @@ import {slideGround} from './ground-collision.js';
 import {actorDimensions} from './actor-scale.js';
 import {actionTravelAt,compileTravelCurve,facingTravelDirection} from './action-travel.js';
 import {bossEngagement} from './engagement-range.js';
+import {leapLanding,leapPose} from './boss-leap.js';
 /** Ground-plane movement rules, with no rendering or animation dependencies. */
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const length = (v) => Math.hypot(v.x, v.z);
@@ -220,11 +221,14 @@ export class MotionState {
     }
 
     const tell = (encounter.timings?.boss||BOSS_TIMING)[encounter.boss.action?.name];
-    if (tell?.windup && encounter.boss.action.elapsed < tell.windup * .65) {
+    // A leap steers until it leaves the floor; from then on the flight owns the facing (stepLeap).
+    if (tell?.windup && encounter.boss.action.elapsed < tell.windup * .65 && !(tell.leap && encounter.boss.action.elapsed >= tell.leap.takeoff)) {
       const desired = Math.atan2(this.player.x - this.boss.x, this.player.z - this.boss.z);
       const delta = Math.atan2(Math.sin(desired - this.boss.yaw), Math.cos(desired - this.boss.yaw));
       this.boss.yaw += clamp(delta, -2.4 * dt, 2.4 * dt);
     }
+
+    if (tell?.leap) this.stepLeap(encounter.boss.action, tell.leap, dt);
 
     // Resolve body overlap without allowing either actor through arena bounds.
     for (let pass = 0; pass < 3; pass++) {
@@ -239,6 +243,23 @@ export class MotionState {
       if(remaining>1e-6)this.move(this.boss,{x:-axis.x,z:-axis.z},remaining,this.dimensions.boss.groundRadius);
     }
     this.bossSpeed=horizontalDistance(bossStart,this.boss)/dt;
+  }
+
+  /** The burst's leap (src/game/boss-leap.js): until take-off the landing spot follows the player; at take-off it
+   * locks, and through the flight the boss is carried along the straight line to it while he turns into it. The
+   * state rides on the action (`action.leap`), so the effects can put the ring of coals where he will land. */
+  stepLeap(action, leap, dt) {
+    const state = action.leap ??= { from: null, to: null };
+    if (!state.from) {
+      state.to = leapLanding(leap, this.boss, this.player);
+      if (action.elapsed < leap.takeoff) return;
+      state.from = { x: this.boss.x, z: this.boss.z };
+    }
+    const { travel } = leapPose(leap, action.elapsed);
+    if (state.to.distance > .05 && travel < 1) this.turn(this.boss, state.to.yaw, dt, 7);
+    const x = state.from.x + (state.to.x - state.from.x) * travel, z = state.from.z + (state.to.z - state.from.z) * travel;
+    const step = { x: x - this.boss.x, z: z - this.boss.z };
+    if (length(step) > 1e-6) this.move(this.boss, normalized(step), length(step), this.dimensions.boss.groundRadius);
   }
 
   move(actor, direction, distance, radius) {

@@ -7,7 +7,7 @@ test('boss strike windows are clip time: a faster action keeps its windows and o
  const timings=createActionTimings(ASSETS.motion.boss,true);
  // The boss advances `elapsed` at actionRate() clip seconds per wall second (encounter.js), so the
  // same strikeIndex boundaries hold at every speed and effects keyed on clip time never drift.
- for(const [name,windows] of [['sweep',[[1.85,2.25]]],['slam',[[timings.slam.windup,timings.slam.windup+timings.slam.active]]],['flurry',[[1.85,2.25],[2.65,3.08]]],['burst',[[2.36,2.81]]]]){
+ for(const [name,windows] of [['sweep',[[1.85,2.25]]],['slam',[[timings.slam.windup,timings.slam.windup+timings.slam.active]]],['flurry',[[1.85,2.25],[2.65,3.08]]],['burst',[[2.9,3.35]]]]){
   windows.forEach(([start,end],index)=>{
    assert.equal(strikeIndex(name,start-1e-4,true,timings),-1,`${name} before window ${index} (windows never touch)`);
    assert.equal(strikeIndex(name,start,true,timings),index,`${name} window ${index} opens exactly`);

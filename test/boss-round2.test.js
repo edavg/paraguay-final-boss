@@ -18,22 +18,26 @@ test('derived actions inherit their base clip and keep clip-time hit windows; di
  assert.deepEqual(timings.flurry.engagementRange,timings.sweep.engagementRange,'the flurry stands where the sweep stands');
  assert.deepEqual(timings.flurry.segments,[[0,2.45,2.45],[2.45,0,2.45]]);
  assert.equal(actionDuration(timings.flurry),4.9);
- assert.ok(Math.abs(timings.burst.reach-3.2)<1e-5&&Math.abs(timings.burst.engagementRange[0]-1.4)<1e-5&&Math.abs(timings.burst.engagementRange[1]-3)<1e-5,'burst distances are world metres after the 1.3 actor scale');
+ assert.ok(Math.abs(timings.burst.reach-3.2)<1e-5&&Math.abs(timings.burst.engagementRange[0]-1.4)<1e-5&&Math.abs(timings.burst.engagementRange[1]-4.2)<1e-5,'burst distances are world metres after the 1.3 actor scale');
+ assert.ok(Math.abs(timings.burst.leap.height-2.6)<1e-5&&Math.abs(timings.burst.leap.gap-1.6)<1e-5&&Math.abs(timings.burst.leap.maxDistance-3)<1e-5,'the leap lengths are scaled once too');
  assert.equal(strikeIndex('flurry',2.0,true,timings),0);assert.equal(strikeIndex('flurry',2.5,true,timings),-1);assert.equal(strikeIndex('flurry',2.8,true,timings),1);assert.equal(strikeIndex('flurry',3.2,true,timings),-1);
- assert.equal(strikeIndex('burst',2.5,true,timings),0);assert.equal(strikeIndex('burst',2.9,true,timings),-1);
+ assert.equal(strikeIndex('burst',2.5,true,timings),-1,'the leaping burst is still in the air');assert.equal(strikeIndex('burst',3.0,true,timings),0);assert.equal(strikeIndex('burst',3.4,true,timings),-1);
  assert.throws(()=>createActionTimings({clips:{sweep:{duration:1}},actions:{x:{clip:'nothing'}}},true),RangeError);
  assert.throws(()=>createActionTimings({clips:{sweep:{duration:1}},actions:{x:{clip:'sweep',segments:[[0,1]],duration:3}}},true),RangeError);
  assert.throws(()=>createActionTimings({clips:{sweep:{duration:1}},actions:{x:{clip:'sweep',radial:true}}},true),RangeError);
 });
 
-test('the flurry replays the sweep forward then straight back, the burst plays the slam clip time',()=>{
+test('the flurry replays the sweep forward then straight back, the burst hangs the slam in the air',()=>{
  const at=(name,elapsed)=>clipPlayback({name,elapsed,hits:[]},timings);
  assert.equal(at('flurry',1.0).name,'sweep');assert.equal(at('flurry',1.0).time,1.0);
  assert.ok(Math.abs(at('flurry',2.45).time-2.45)<1e-9);
  assert.ok(Math.abs(at('flurry',3.0).time-1.9)<1e-9,'the return pass runs the clip backwards from 2.45');
  assert.ok(Math.abs(at('flurry',4.9).time)<1e-9,'the flurry ends on the clip start pose');
  assert.equal(at('flurry',1.0).duration,4.4,'the animation maps clip time against the base clip length');
- assert.equal(at('burst',2.5).name,'slam');assert.equal(at('burst',2.5).time,2.5);
+ assert.equal(at('burst',1.0).name,'slam');assert.equal(at('burst',1.0).time,1.0);
+ assert.ok(Math.abs(at('burst',1.6+1.0).time-2.05)<1e-9,'the flight stretches clip 1.6-2.05 (the scythe rising overhead) over 1.0 s');
+ assert.ok(Math.abs(at('burst',2.9).time-2.3)<1e-9,'he lands as the blade bottoms out');
+ assert.ok(Math.abs(at('burst',5.5).time-4.9)<1e-9);
  assert.equal(clipPlayback({name:'sweep',elapsed:1},timings),null);
  assert.equal(clipPlayback(null,timings),null);
 });
@@ -60,19 +64,19 @@ test('per-action pace: windups, active windows and recoveries scale with each ac
 
 test('the burst hits by distance inside its reach, not by blade contact, and respects the roll and the guard',()=>{
  const fight=new Fight(ASSETS.motion);fight.playerDamageTaken=1;fight.start();
- // One 1/120 s step at the burst's 1.25x rate carries 2.355 past the 2.36 window start.
- fight.boss.action={name:'burst',elapsed:2.355,hits:[]};
+ // One 1/120 s step at the burst's 1.35x rate carries 2.895 past the 2.9 window start (the landing).
+ fight.boss.action={name:'burst',elapsed:2.895,hits:[]};
  fight.step(1/120,geo({distance:3.19,bossHit:false}));
  assert.equal(fight.player.health,70,'inside 3.2 m the ring lands without any blade geometry');
  assert.deepEqual(fight.drain().at(-1),{type:'player-hit',damage:30,action:'burst'});
- fight.reset();fight.start();fight.boss.action={name:'burst',elapsed:2.355,hits:[]};
+ fight.reset();fight.start();fight.boss.action={name:'burst',elapsed:2.895,hits:[]};
  fight.step(1/120,geo({distance:3.21,bossHit:true}));
  assert.equal(fight.player.health,100,'outside the reach even a blade overlap does nothing');
  fight.reset();fight.start();fight.request('dodge');run(fight,.2,geo({distance:5}));
- fight.boss.action={name:'burst',elapsed:2.355,hits:[]};fight.step(1/120,geo({distance:1.5}));
+ fight.boss.action={name:'burst',elapsed:2.895,hits:[]};fight.step(1/120,geo({distance:1.5}));
  assert.equal(fight.player.health,100);assert.equal(fight.stats.evades,1);
- fight.reset();fight.start();fight.player.blocking=true;fight.boss.action={name:'burst',elapsed:2.355,hits:[]};fight.step(1/120,geo({distance:1.5}));
- assert.equal(fight.player.health,96);assert.equal(fight.stats.blocks,1);
+ fight.reset();fight.start();fight.request('parry');fight.player.action.elapsed=.15;fight.boss.action={name:'burst',elapsed:2.895,hits:[]};fight.step(1/120,geo({distance:1.5}));
+ assert.equal(fight.player.health,70,'the ring of fire goes past the shield');assert.equal(fight.stats.parries,0);
 });
 
 test('the flurry resolves two independent cuts; a hit on the first does not cover the second',()=>{
@@ -92,7 +96,7 @@ test('weighted selection only offers attacks whose band contains the player and 
  const names=distance=>bossEngagement(boss,1,distance,0,{random:0}).eligible.map(e=>e.name).sort();
  assert.deepEqual(names(1.6),['burst','flurry','sweep']);
  assert.deepEqual(names(2.8),['burst','delayedSlam','slam']);
- assert.deepEqual(names(3.2),['delayedSlam','fissure','slam']);
+ assert.deepEqual(names(3.2),['burst','delayedSlam','fissure','slam'],'the leaping burst reaches past the slam band');
  assert.deepEqual(names(5),['fissure','pillars'],'past the slam band the fissure and the pillars reach');
  assert.deepEqual(names(9.5),['pillars'],'past the fissure only the pillars reach');
  assert.deepEqual(names(14),[]);
@@ -108,7 +112,7 @@ test('weighted selection only offers attacks whose band contains the player and 
  assert.equal(fresh.selected.name,'slam');assert.equal(fresh.selected.nextIndex,5);
  for(let i=0;i<40;i++){const pick=bossEngagement(boss,2,1.6,0,{random:i/40,history:['flurry','flurry']}).selected.name;assert.notEqual(pick,'flurry');}
  assert.equal(bossEngagement(boss,1,1.6,0,{random:0,forced:'burst'}).selected.name,'burst','the forced opener wins when eligible');
- assert.equal(bossEngagement(boss,1,3.2,0,{random:0,forced:'burst'}).selected.name,'slam','and is ignored out of its band');
+ assert.equal(bossEngagement(boss,1,4.5,0,{random:0,forced:'burst'}).selected.name,'fissure','and is ignored out of its band');
  let draws=0;bossEngagement(boss,1,1.6,0,{random:()=>{draws++;return .5;}});assert.equal(draws,1,'one draw per choice');
  draws=0;bossEngagement(boss,1,14,0,{random:()=>{draws++;return .5;}});assert.equal(draws,0,'no draw when nothing is eligible');
  assert.throws(()=>bossEngagement(boss,1,1.6,0,{random:1}),RangeError);
@@ -154,8 +158,8 @@ test('the approach agrees with the fight: an exhausted band walks the boss in, t
  assert.ok(fight.boss.action,'the boss did not stall at pillars range after two pillars');
  assert.notEqual(fight.boss.action.name,'pillars');
  assert.ok(motion.geometry().distance<8.6,'it walked into the fissure band to attack');
- const walk=ASSETS.motion.boss.clips['walk-forward'].sourceSpeed;
- assert.ok(ASSETS.motion.boss.locomotionSpeed/walk<=1.4+1e-9,'phase one walk within the 1.4x clip rate clamp');
- assert.ok(ASSETS.motion.boss.locomotionSpeed*ASSETS.motion.boss.phaseTwoWalkMultiplier/walk<=1.4+1e-9,'phase two walk within the clamp');
+ const walk=ASSETS.motion.boss.clips['walk-forward'].sourceSpeed,clamp=ASSETS.motion.boss.clips['walk-forward'].maxRate??1.4;
+ assert.ok(ASSETS.motion.boss.locomotionSpeed/walk<=clamp+1e-9,'phase one walk within the clip rate clamp');
+ assert.ok(ASSETS.motion.boss.locomotionSpeed*ASSETS.motion.boss.phaseTwoWalkMultiplier/walk<=clamp+1e-9,'phase two walk within the clamp');
  assert.ok(ASSETS.motion.boss.idleTurnRate/120<.02,'the idle turn still cannot spin in one step');
 });
